@@ -623,20 +623,25 @@ def guardar_respuestas_flash():
     id_usuario = session['id_usuario'] 
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        for key, value in request.form.items():
-            if key.startswith('pregunta_'):
-                id_pregunta = key.split('_')[1]
-                respuesta_elegida = value
-                
-                cursor.execute("SELECT respuesta_correcta FROM Preguntas_Flash WHERE id_pregunta_flash = %s", (id_pregunta,))
-                res_db = cursor.fetchone()
-                
-                if res_db:
-                    es_correcta = (res_db['respuesta_correcta'] == respuesta_elegida)
-                    cursor.execute("""
-                        INSERT INTO Respuestas_Flash (codigo_sala, id_alumno, id_pregunta_flash, respuesta_elegida, es_correcta)
-                        VALUES (%s, %s, %s, %s, %s)
-                    """, (pin, id_usuario, id_pregunta, respuesta_elegida, es_correcta))
+        cursor.execute("DELETE FROM Respuestas_Flash WHERE codigo_sala = %s AND id_alumno = %s", (pin, id_usuario))
+
+respuestas = {}
+for key, value in request.form.items():
+    if key.startswith('pregunta_'):
+        id_pregunta = key.split('_')[1]
+        if value == 'TRAMPA' or id_pregunta not in respuestas:
+            respuestas[id_pregunta] = value
+
+for id_pregunta, respuesta_elegida in respuestas.items():
+    cursor.execute("SELECT respuesta_correcta FROM Preguntas_Flash WHERE id_pregunta_flash = %s", (id_pregunta,))
+    res_db = cursor.fetchone()
+    if res_db:
+        es_correcta = (res_db['respuesta_correcta'] == respuesta_elegida)
+        cursor.execute("""
+            INSERT INTO Respuestas_Flash (codigo_sala, id_alumno, id_pregunta_flash, respuesta_elegida, es_correcta)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (pin, id_usuario, id_pregunta, respuesta_elegida, es_correcta))
+
         conexion.commit()
     conexion.close()
     return redirect(url_for('diagnostico_alumno', pin=pin))
