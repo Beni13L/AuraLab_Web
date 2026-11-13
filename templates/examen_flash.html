@@ -93,85 +93,88 @@
 
 <script>
     // ================= SISTEMA ANTI-TRAMPA CON SALTO Y AUTO-ENVÍO =================
-    document.addEventListener("visibilitychange", function() {
-        if (document.hidden) {
-            let form = document.getElementById('formExamen');
-            let preguntas = document.querySelectorAll('.bloque-pregunta');
-            let castigoAplicado = false;
-            let totalSinContestar = 0;
-            
-            // Mostrar la pantalla de alerta bloqueante
-            document.getElementById('alertaAntiTrampa').style.display = 'block';
-            
-            // 1. Contar cuántas preguntas faltan por contestar en total
-            preguntas.forEach(bloque => {
-                let respondida = bloque.querySelector('input[type="radio"]:checked');
-                let anulada = bloque.classList.contains('pregunta-anulada');
-                if (!respondida && !anulada) { totalSinContestar++; }
-            });
+    // Castiga 1 pregunta por cada salida: cambio de pestaña (visibilitychange)
+    // o clic en otro navegador / otra mitad de la pantalla (blur).
+    let ultimoCastigo = 0;
+    let timerBlur = null;
 
-            // 2. Buscar la primera pregunta disponible y castigarla
-            for (let i = 0; i < preguntas.length; i++) {
-                let bloque = preguntas[i];
-                let respondida = bloque.querySelector('input[type="radio"]:checked');
-                
-                if (!respondida && !bloque.classList.contains('pregunta-anulada') && !castigoAplicado) {
-                    // Aplicar el bloqueo visual y deshabilitar opciones
-                    bloque.classList.add('pregunta-anulada');
-                    let radios = bloque.querySelectorAll('input[type="radio"]');
-                    radios.forEach(radio => {
-                        radio.disabled = true;
-                        radio.required = false; 
-                    });
-                    
-                    // Crear el valor "TRAMPA" para que Python lo repruebe
-                    let inputOculto = document.createElement('input');
-                    inputOculto.type = 'hidden';
-                    inputOculto.name = radios[0].name; 
-                    inputOculto.value = 'TRAMPA';
-                    bloque.appendChild(inputOculto);
-                    
-                    // Inyectar el mensaje en la pregunta
-                    bloque.insertAdjacentHTML('beforeend', `
-                        <div class="alert alert-danger mt-4 mb-0 fw-bold d-flex align-items-center">
-                            <i class="bi bi-x-circle-fill me-2 fs-5"></i> 
-                            <div>Pregunta anulada automáticamente por abandonar la pantalla.</div>
-                        </div>
-                    `);
-                    
-                    castigoAplicado = true;
-                    totalSinContestar--; 
+    function aplicarCastigo() {
+        let ahora = Date.now();
+        if (ahora - ultimoCastigo < 5000) { return; }
+        ultimoCastigo = ahora;
 
-                    // 3. Evaluar si era la última pregunta
-                    if (totalSinContestar === 0) {
-                        // Cambiamos los textos de la alerta y ocultamos el botón
-                        document.getElementById('textoAlerta').innerText = "Has intentado salir en tu última pregunta.";
-                        document.getElementById('textoSancion').innerText = "Se anuló tu última pregunta. El examen finalizará y se enviará automáticamente.";
-                        document.getElementById('btnEntendido').style.display = 'none';
-                        
-                        // Forzamos el envío del examen en 3 segundos para que alcance a leer el regaño
-                        setTimeout(() => { form.submit(); }, 3000); 
-                    } else {
-                        // Si aún hay preguntas, preparamos el "salto" a la siguiente
-                        for (let j = i + 1; j < preguntas.length; j++) {
-                             let respSig = preguntas[j].querySelector('input[type="radio"]:checked');
-                             let anulSig = preguntas[j].classList.contains('pregunta-anulada');
-                             if (!respSig && !anulSig) {
-                                 // Hacemos scroll suave hasta la siguiente pregunta disponible
-                                 setTimeout(() => {
-                                     preguntas[j].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                 }, 500);
-                                 break;
-                             }
+        let form = document.getElementById('formExamen');
+        let preguntas = document.querySelectorAll('.bloque-pregunta');
+        let castigoAplicado = false;
+        let totalSinContestar = 0;
+
+        document.getElementById('alertaAntiTrampa').style.display = 'block';
+
+        preguntas.forEach(bloque => {
+            let respondida = bloque.querySelector('input[type="radio"]:checked');
+            let anulada = bloque.classList.contains('pregunta-anulada');
+            if (!respondida && !anulada) { totalSinContestar++; }
+        });
+
+        for (let i = 0; i < preguntas.length; i++) {
+            let bloque = preguntas[i];
+            let respondida = bloque.querySelector('input[type="radio"]:checked');
+            if (!respondida && !bloque.classList.contains('pregunta-anulada') && !castigoAplicado) {
+                bloque.classList.add('pregunta-anulada');
+                let radios = bloque.querySelectorAll('input[type="radio"]');
+                radios.forEach(radio => {
+                    radio.disabled = true;
+                    radio.required = false;
+                });
+                let inputOculto = document.createElement('input');
+                inputOculto.type = 'hidden';
+                inputOculto.name = radios[0].name;
+                inputOculto.value = 'TRAMPA';
+                bloque.appendChild(inputOculto);
+                bloque.insertAdjacentHTML('beforeend', `
+                    <div class="alert alert-danger mt-4 mb-0 fw-bold d-flex align-items-center">
+                        <i class="bi bi-x-circle-fill me-2 fs-5"></i>
+                        <div>Pregunta anulada automáticamente por abandonar la pantalla.</div>
+                    </div>
+                `);
+                castigoAplicado = true;
+                totalSinContestar--;
+                if (totalSinContestar === 0) {
+                    document.getElementById('textoAlerta').innerText = "Has intentado salir en tu última pregunta.";
+                    document.getElementById('textoSancion').innerText = "Se anuló tu última pregunta. El examen finalizará y se enviará automáticamente.";
+                    document.getElementById('btnEntendido').style.display = 'none';
+                    setTimeout(() => { form.submit(); }, 3000);
+                } else {
+                    for (let j = i + 1; j < preguntas.length; j++) {
+                        let respSig = preguntas[j].querySelector('input[type="radio"]:checked');
+                        let anulSig = preguntas[j].classList.contains('pregunta-anulada');
+                        if (!respSig && !anulSig) {
+                            setTimeout(() => {
+                                preguntas[j].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 500);
+                            break;
                         }
                     }
-                    break; // Cortamos el ciclo para castigar solo 1 pregunta por cada vez que se sale
                 }
+                break;
             }
         }
+    }
+
+    document.addEventListener("visibilitychange", function() {
+        if (document.hidden) { aplicarCastigo(); }
     });
 
-    // Función para cerrar la pantalla de advertencia
+    window.addEventListener('blur', function() {
+        timerBlur = setTimeout(function() {
+            if (!document.hasFocus()) { aplicarCastigo(); }
+        }, 2000);
+    });
+
+    window.addEventListener('focus', function() {
+        clearTimeout(timerBlur);
+    });
+
     function cerrarAdvertencia() {
         document.getElementById('alertaAntiTrampa').style.display = 'none';
     }
