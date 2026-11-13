@@ -78,7 +78,7 @@
                     </div>
                     <form id="paso2_registro_doc" action="/registro_docente" method="POST" class="fade-transition text-start" style="display: none;" onsubmit="localStorage.removeItem('AuraLab_GlobalToken'); alert('¡Cuenta creada! Tu usuario será generado automáticamente.');">
                         <div class="alert alert-warning p-2 text-center mb-3 fw-bold small"><i class="bi bi-clock-history"></i> Expira en: <span id="tiempoRestante">05:00</span></div>
-                        <div class="mb-3"><label class="small fw-bold">Nombre Completo</label><input type="text" class="form-control" name="nombre" required></div>
+                        <div class="row">     <div class="col-6 mb-3"><label class="small fw-bold">Nombre(s)</label><input type="text" class="form-control" name="nombre" required></div>     <div class="col-6 mb-3"><label class="small fw-bold">Apellidos</label><input type="text" class="form-control" name="apellidos" required></div> </div>
                         <div class="mb-3"><label class="small fw-bold">Correo</label><input type="email" class="form-control" name="correo" required></div>
                         <div class="mb-4"><label class="small fw-bold">Contraseña</label><input type="password" class="form-control" name="contrasena" required></div>
                         <button type="submit" class="btn btn-success w-100 fw-bold">Darme de Alta como Docente</button>
