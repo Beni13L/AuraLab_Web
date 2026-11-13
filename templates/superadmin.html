@@ -316,7 +316,7 @@
     function generarClave() {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; let codigo = '';
         for(let i=0; i<6; i++) codigo += chars.charAt(Math.floor(Math.random() * chars.length));
-        let claveFinal = 'CUT-' + codigo;
+        let claveFinal = 'DOC-' + codigo;
         document.getElementById('codigoGenerado').innerText = claveFinal;
         
         // ¡MAGIA NIVEL DIOS! Guardamos la clave exacta y el tiempo de vida (TTL) desde el panel Admin
