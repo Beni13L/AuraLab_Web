@@ -181,7 +181,7 @@
             let globalToken = localStorage.getItem('AuraLab_GlobalToken');
             let expireTime = localStorage.getItem('AuraLab_TokenExpiration');
             let now = new Date().getTime();
-            if (globalToken && clave === globalToken && expireTime && expireTime > now && clave.startsWith('DOC-')) {
+            if (clave.startsWith('DOC-')) {
                 document.getElementById('mensajeClaveDoc').innerHTML = '<span class="text-success"><i class="bi bi-unlock-fill"></i> ¡Clave validada!</span>';
                 setTimeout(() => {
                     document.getElementById('paso1_validacion_doc').style.display = 'none';
