@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, session, redirect, url_for
 from flask_socketio import SocketIO
 import pymysql
 import random
-import string
+import string 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'AuraLab_Secreto_123' 
