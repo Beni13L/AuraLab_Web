@@ -154,19 +154,16 @@ def entrar_sala():
 # ================= REGISTRO DE NUEVOS USUARIOS VÍA CÓDIGOS =================
 @app.route('/registro_docente', methods=['POST'])
 def registro_docente():
-    nombre_pila = request.form['nombre'].strip() 
-    apellidos = request.form['apellidos'].strip() 
+    nombre_pila = request.form['nombre'].strip()
+    apellidos = request.form['apellidos'].strip()
     nombre = f"{nombre_pila} {apellidos}"
+    matricula = request.form['matricula'].upper().strip()
     correo = request.form['correo']
     contrasena = request.form['contrasena']
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("SELECT MAX(id_usuario) as max_id FROM Usuarios")
-        res = cursor.fetchone()
-        next_id = (res['max_id'] or 0) + 1
-        matricula_nueva = f"DOC-{str(next_id).zfill(4)}"
-        cursor.execute("INSERT INTO Usuarios (matricula, nombre_completo, correo, contrasena_hash, rol) VALUES (%s, %s, %s, %s, %s)", 
-                       (matricula_nueva, nombre, correo, contrasena, 'Maestro'))
+        cursor.execute("INSERT INTO Usuarios (matricula, nombre_completo, correo, contrasena_hash, rol) VALUES (%s, %s, %s, %s, %s)",
+                       (matricula, nombre, correo, contrasena, 'Maestro'))
         conexion.commit()
     conexion.close()
     return redirect(url_for('login'))
