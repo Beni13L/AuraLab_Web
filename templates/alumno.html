@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Portal del Alumno - AuraLab</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        .navbar { background-color: #1a252f; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .card { border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: none; }
+        .card-pin { background: linear-gradient(135deg, #1a252f 0%, #2c3e50 100%); color: white; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-dark mb-4">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold" href="#"><i class="bi bi-mortarboard-fill me-2 text-warning"></i> AuraLab | Portal Estudiantil</a>
+        <div class="text-light d-flex align-items-center">
+            <span class="me-4 text-white-50"><i class="bi bi-person-circle"></i> Alumno: {{ nombre }}</span>
+            <a href="/logout" class="btn btn-outline-light btn-sm" style="border-radius: 8px;">Cerrar Sesión</a>
+        </div>
+    </div>
+</nav>
+<div class="container pb-5">
+    
+    <!-- TARJETA PARA INGRESAR EL PIN DE LA EVALUACIÓN EN VIVO -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card card-pin p-4 shadow">
+                <div class="row align-items-center">
+                    <div class="col-md-8 mb-3 mb-md-0">
+                        <h4 class="fw-bold text-warning mb-1"><i class="bi bi-lightning-charge-fill"></i> Unirse a Evaluación en Vivo</h4>
+                        <p class="text-white-50 mb-0 small">¿Tu profesor proyectó un PIN en clase? Ingrésalo aquí abajo para acceder al examen al instante.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <form action="/unirse_sala" method="POST" class="d-flex gap-2">
+                            <input type="text" name="codigo_sala" class="form-control text-uppercase fw-bold text-center" placeholder="EJ. EXAM-ROLU" required style="letter-spacing: 2px;">
+                            <button type="submit" class="btn btn-warning fw-bold text-dark px-4">Entrar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- COLUMNA IZQUIERDA: MIS MATERIAS INSCRITAS -->
+        <div class="col-md-7 mb-4">
+            <div class="card p-4 h-100">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-book-fill text-primary me-2"></i> Mis Materias Inscritas</h5>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="bg-light text-muted small text-uppercase">
+                            <tr>
+                                <th>Materia</th>
+                                <th>Sección</th>
+                                <th>Profesor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in materias %}
+                            <tr>
+                                <td class="fw-bold text-dark">{{ m.nombre_materia }}</td>
+                                <td><span class="badge bg-secondary">{{ m.seccion }}</span></td>
+                                <td class="text-muted small">{{ m.nombre_maestro }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center py-4 text-muted">Aún no estás inscrito en ninguna materia. Usa tu código de invitación (ALUM-XXXX).</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Formulario rápido para inscribirse a otra materia con código -->
+                <div class="mt-4 pt-3 border-top">
+                    <h6 class="fw-bold text-muted small text-uppercase mb-2">Inscribirse a una nueva materia</h6>
+                    <form action="/inscribir_con_codigo" method="POST" class="d-flex gap-2">
+                        <input type="text" name="codigo_clase" class="form-control form-control-sm text-uppercase" placeholder="Código de invitación (Ej. ALUM-K7RX)" required>
+                        <button type="submit" class="btn btn-dark btn-sm fw-bold text-nowrap">Inscribirse</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: HISTORIAL Y RENDIMIENTO -->
+        <div class="col-md-5 mb-4">
+            <div class="card p-4 h-100">
+                <h5 class="fw-bold text-dark mb-3"><i class="bi bi-graph-up-arrow text-success me-2"></i> Mi Rendimiento y Calificaciones</h5>
+                
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead class="bg-light text-muted small text-uppercase">
+                            <tr>
+                                <th>Sala / Examen</th>
+                                <th>Aciertos</th>
+                                <th class="text-end">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for h in historial %}
+                            <tr>
+                                <td>
+                                    <span class="fw-bold text-dark d-block">{{ h.nombre_materia }}</span>
+                                    <span class="text-muted" style="font-size: 0.75rem;">PIN: {{ h.codigo_sala }}</span>
+                                </td>
+                                <td><span class="badge bg-success">{{ h.aciertos }} correctas</span></td>
+                                <td class="text-end">
+                                    <!-- Botón para ver el detalle de su examen -->
+                                    <a href="/diagnostico_alumno/{{ h.codigo_sala }}" class="btn btn-sm btn-outline-primary fw-bold px-2 py-1" style="font-size: 0.8rem;">
+                                        <i class="bi bi-eye-fill"></i> Ver Examen
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center py-4 text-muted small">Aún no tienes evaluaciones registradas.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Resultados - AuraLab</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #1a252f; color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        .card { border-radius: 16px; background-color: #ffffff; color: #333; }
+        .score-circle { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 900; margin: 0 auto; background: #f8f9fa; border: 8px solid #ffc107; color: #1a252f; }
+    </style>
+</head>
+<body>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg p-5 mb-4 text-center border-0">
+                <h3 class="fw-bold text-dark mb-4">Evaluación Finalizada</h3>
+                <div class="score-circle mb-3">{{ aciertos }}/{{ total }}</div>
+                <p class="text-muted fw-bold">Aciertos totales</p>
+                <a href="/portal_alumno" class="btn btn-outline-primary mt-2">Volver a mi Portal</a>
+            </div>
+            <h5 class="fw-bold text-white mb-3">Desglose de Preguntas</h5>
+            {% for r in respuestas %}
+            <div class="card shadow-sm border-0 mb-3 p-3 {% if r.es_correcta %} border-start border-success border-5 {% else %} border-start border-danger border-5 {% endif %}">
+                <p class="fw-bold mb-2">{{ r.texto_pregunta }}</p>
+                <div class="d-flex justify-content-between small">
+                    <span class="text-muted">Tu respuesta: <strong class="{% if r.es_correcta %} text-success {% else %} text-danger {% endif %}">{{ r.respuesta_elegida }}</strong></span>
+                    {% if not r.es_correcta %}
+                    <span class="text-muted">Correcta: <strong class="text-success">{{ r.respuesta_correcta }}</strong></span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+</body>
+</html>

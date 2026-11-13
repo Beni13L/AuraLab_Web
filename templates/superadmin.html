@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Administrador - AuraLab</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        .navbar { background-color: #1a252f; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .card { border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.04); overflow: hidden; }
+        .card-header { border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .form-control, .form-select { border-radius: 10px; background-color: #f8f9fa; border: 1px solid #e1e5eb; padding: 10px 15px; }
+        .form-control:focus, .form-select:focus { border-color: #4a90e2; box-shadow: 0 0 0 0.25rem rgba(74, 144, 226, 0.2); background-color: #fff; }
+        .btn-primary { background-color: #2c3e50; border: none; border-radius: 10px; font-weight: 600; padding: 10px; }
+        .token-card { background: linear-gradient(135deg, #4a90e2 0%, #50e3c2 100%); color: white; }
+        .token-display { background: rgba(255,255,255,0.2); border-radius: 10px; padding: 15px; font-family: monospace; font-size: 1.5rem; letter-spacing: 2px; font-weight: bold; }
+        .table th { color: #6c757d; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark mb-4">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold" href="#"><i class="bi bi-shield-lock-fill text-info"></i> AuraLab | Administración Central</a>
+        <div class="text-light d-flex align-items-center">
+            <span class="me-4 text-white-50"><i class="bi bi-person-badge"></i> {{ nombre }}</span>
+            <a href="/logout" class="btn btn-outline-light btn-sm" style="border-radius: 8px;">Cerrar Sesión</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid px-4">
+    <div class="row">
+        
+        <!-- ================= COLUMNA IZQUIERDA ================= -->
+        <div class="col-md-4 col-lg-3 mb-4">
+            
+            <div class="card token-card mb-4 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-key-fill display-4 mb-2" style="opacity: 0.9;"></i>
+                    <h5 class="fw-bold">Clave Institucional</h5>
+                    <div class="token-display mb-3" id="codigoGenerado">CUT-****</div>
+                    <button class="btn btn-light w-100 fw-bold text-primary shadow-sm mb-2" onclick="generarClave()">Generar Nueva Clave</button>
+                    <!-- BOTÓN OCULTO DE WHATSAPP -->
+                    <a id="btnWhatsapp" href="#" target="_blank" class="btn btn-success w-100 fw-bold shadow-sm" style="display: none; background-color: #25D366; border: none;">
+                        <i class="bi bi-whatsapp"></i> Enviar por WhatsApp
+                    </a>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3"><h6 class="mb-0 fw-bold text-dark"><i class="bi bi-person-plus-fill text-primary"></i> Alta de Usuario</h6></div>
+                <div class="card-body p-4">
+                    <form action="/crear_usuario" method="POST">
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Asignar Rol</label>
+                            <select class="form-select border-primary" name="rol" id="rolSelect" onchange="actualizarFormulario()" required>
+                                <option value="Alumno" selected>Estudiante (Alumno)</option>
+                                <option value="Maestro">Docente (Maestro)</option>
+                                <option value="Superadmin">Administrador (Admin)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-success">Matrícula Secuencial</label>
+                            <input type="text" class="form-control bg-light text-success fw-bold" name="matricula" id="matriculaInput" readonly>
+                        </div>
+                        
+                        <div id="seccionAlumno">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Carrera</label>
+                                <select class="form-select" name="carrera" id="carreraInput">
+                                   <option value="" selected disabled>Selecciona...</option>
+                                   <option value="Ingeniería en TIC">Ingeniería en TIC</option>
+                                   <option value="Diseño Gráfico">Diseño Gráfico</option>
+                                   <option value="Derecho">Derecho</option>
+                                   <option value="Administración">Administración</option>
+                                   <option value="Psicología">Psicología</option>
+                                   <option value="Arquitectura">Arquitectura</option>
+                                   <option value="Ingeniería Industrial">Ingeniería Industrial</option>
+                                   <option value="Nutrición">Nutrición</option>
+                                   <option value="Ciencia Forense">Ciencia Forense</option>
+                                   <option value="Posgrado">Posgrado</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold text-muted">Cuatrimestre</label>
+                                <select class="form-select" name="cuatrimestre" id="cuatriInput">
+                                    <option value="" selected disabled>Selecciona...</option>
+                                    {% for c in ['1er', '2do', '3er', '4to', '5to', '6to', '7mo', '8vo', '9no', '10mo'] %}
+                                    <option value="{{ c }} Cuatrimestre">{{ c }} Cuatrimestre</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Nombre Completo</label>
+                            <input type="text" class="form-control" name="nombre" id="nombreInput" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Correo Institucional</label>
+                            <input type="email" class="form-control" name="correo" id="correoInput" placeholder="ejemplo@cut.edu.mx" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-muted">Contraseña Inicial</label>
+                            <input type="text" class="form-control" name="contrasena" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">Registrar en Sistema</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= COLUMNA DERECHA ================= -->
+        <div class="col-md-8 col-lg-9">
+            <ul class="nav nav-pills mb-4 shadow-sm bg-white p-2" style="border-radius: 12px;" id="adminTabs">
+                <li class="nav-item"><button class="nav-link active fw-bold px-4" data-bs-toggle="tab" data-bs-target="#alumnos-pane"><i class="bi bi-book"></i> Alumnos</button></li>
+                <li class="nav-item"><button class="nav-link fw-bold px-4" data-bs-toggle="tab" data-bs-target="#maestros-pane"><i class="bi bi-briefcase"></i> Docentes</button></li>
+                <li class="nav-item"><button class="nav-link fw-bold px-4" data-bs-toggle="tab" data-bs-target="#admins-pane"><i class="bi bi-shield-lock"></i> Administradores</button></li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- PESTAÑA ALUMNOS -->
+                <div class="tab-pane fade show active" id="alumnos-pane">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold text-dark">Directorio de Alumnos</h6>
+                            <input type="text" class="form-control form-control-sm w-auto" placeholder="🔍 Buscar por nombre o carrera..." onkeyup="buscarEnTabla(this, 'tablaAlumnos')">
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0" id="tablaAlumnos">
+                                    <thead class="bg-light"><tr><th class="px-4">Matrícula</th><th>Nombre / Correo</th><th>Académico</th><th class="text-end px-4">Acciones</th></tr></thead>
+                                    <tbody>
+                                        {% for u in usuarios %}{% if u.rol == 'Alumno' %}
+                                        <tr>
+                                            <td class="px-4"><span class="badge bg-success rounded-pill px-3">{{ u.matricula }}</span></td>
+                                            <td>
+                                                <div class="fw-medium text-dark">{{ u.nombre_completo }}</div>
+                                                <div class="text-muted small">{% if u.correo and u.correo != 'None' %}{{ u.correo }}{% else %}No registrado{% endif %}</div>
+                                            </td>
+                                            <td>
+                                                <div class="small fw-bold text-primary"><i class="bi bi-mortarboard"></i> {% if u.carrera %}{{ u.carrera }}{% else %}N/A{% endif %}</div>
+                                                <div class="small text-muted"><i class="bi bi-calendar"></i> {% if u.cuatrimestre %}{{ u.cuatrimestre }}{% else %}N/A{% endif %}</div>
+                                            </td>
+                                            <td class="text-end px-4">
+                                                <button class="btn btn-light btn-sm border" data-bs-toggle="modal" data-bs-target="#modalEditar{{ u.id_usuario }}"><i class="bi bi-pencil-square text-primary"></i></button>
+                                                <a href="/eliminar_usuario/{{ u.id_usuario }}" class="btn btn-light btn-sm border text-danger" onclick="return confirm('¿Eliminar alumno?');"><i class="bi bi-trash"></i></a>
+                                            </td>
+                                        </tr>
+                                        {% endif %}{% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PESTAÑA DOCENTES -->
+                <div class="tab-pane fade" id="maestros-pane">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold text-dark">Directorio de Docentes</h6>
+                            <input type="text" class="form-control form-control-sm w-auto" placeholder="🔍 Buscar docente..." onkeyup="buscarEnTabla(this, 'tablaDocentes')">
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-hover mb-0" id="tablaDocentes">
+                                <thead class="bg-light"><tr><th class="px-4">Nómina</th><th>Nombre Completo</th><th>Correo</th><th class="text-end px-4">Acciones</th></tr></thead>
+                                <tbody>
+                                    {% for u in usuarios %}{% if u.rol == 'Maestro' %}
+                                    <tr>
+                                        <td class="px-4"><span class="badge bg-info text-dark rounded-pill px-3">{{ u.matricula }}</span></td>
+                                        <td class="fw-medium text-dark">{{ u.nombre_completo }}</td>
+                                        <td class="text-muted small">{% if u.correo and u.correo != 'None' %}{{ u.correo }}{% else %}No registrado{% endif %}</td>
+                                        <td class="text-end px-4">
+                                            <button class="btn btn-light btn-sm border" data-bs-toggle="modal" data-bs-target="#modalEditar{{ u.id_usuario }}"><i class="bi bi-pencil-square text-primary"></i></button>
+                                            <a href="/eliminar_usuario/{{ u.id_usuario }}" class="btn btn-light btn-sm border text-danger" onclick="return confirm('¿Eliminar docente?');"><i class="bi bi-trash"></i></a>
+                                        </td>
+                                    </tr>
+                                    {% endif %}{% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PESTAÑA ADMINISTRADORES -->
+                <div class="tab-pane fade" id="admins-pane">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 fw-bold text-dark">Administradores Centrales</h6>
+                            <input type="text" class="form-control form-control-sm w-auto" placeholder="🔍 Buscar admin..." onkeyup="buscarEnTabla(this, 'tablaAdmins')">
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-hover mb-0" id="tablaAdmins">
+                                <thead class="bg-light"><tr><th class="px-4">ID Admin</th><th>Nombre Completo</th><th>Correo</th><th class="text-end px-4">Acciones</th></tr></thead>
+                                <tbody>
+                                    {% for u in usuarios %}{% if u.rol == 'Superadmin' %}
+                                    <tr>
+                                        <td class="px-4"><span class="badge bg-dark rounded-pill px-3">{{ u.matricula }}</span></td>
+                                        <td class="fw-medium text-dark">{{ u.nombre_completo }} {% if u.id_usuario == mi_id %}<span class="badge bg-warning text-dark ms-2">Tú</span>{% endif %}</td>
+                                        <td class="text-muted small">{% if u.correo and u.correo != 'None' %}{{ u.correo }}{% else %}No registrado{% endif %}</td>
+                                        <td class="text-end px-4">
+                                            <button class="btn btn-light btn-sm border" data-bs-toggle="modal" data-bs-target="#modalEditar{{ u.id_usuario }}"><i class="bi bi-pencil-square text-primary"></i></button>
+                                            {% if u.id_usuario != mi_id %}
+                                            <a href="/eliminar_usuario/{{ u.id_usuario }}" class="btn btn-light btn-sm border text-danger" onclick="return confirm('¿Eliminar admin?');"><i class="bi bi-trash"></i></a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endif %}{% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODALES DE EDICIÓN ================= -->
+{% for u in usuarios %}
+<div class="modal fade" id="modalEditar{{ u.id_usuario }}">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; border: none;">
+            <div class="modal-header bg-light border-bottom-0"><h5 class="modal-title fw-bold">Modificar Usuario</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+            <form action="/actualizar_usuario" method="POST">
+                <div class="modal-body p-4 text-start">
+                    <input type="hidden" name="id_usuario" value="{{ u.id_usuario }}">
+                    
+                    <div class="mb-3"><label class="small fw-bold">Matrícula</label><input type="text" class="form-control bg-light" name="matricula" value="{{ u.matricula }}" readonly></div>
+                    
+                    {% if u.rol == 'Alumno' %}
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="small fw-bold">Carrera</label>
+                            <select class="form-select form-select-sm" name="carrera" required>
+                                <option value="Ingeniería en TIC" {% if u.carrera == 'Ingeniería en TIC' %}selected{% endif %}>Ingeniería en TIC</option>
+                                <option value="Diseño Gráfico" {% if u.carrera == 'Diseño Gráfico' %}selected{% endif %}>Diseño Gráfico</option>
+                                <option value="Derecho" {% if u.carrera == 'Derecho' %}selected{% endif %}>Derecho</option>
+                                <option value="Administración" {% if u.carrera == 'Administración' %}selected{% endif %}>Administración</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="small fw-bold">Cuatrimestre</label>
+                            <select class="form-select form-select-sm" name="cuatrimestre" required>
+                                {% for c in ['1er', '2do', '3er', '4to', '5to', '6to', '7mo', '8vo', '9no', '10mo'] %}
+                                <option value="{{ c }} Cuatrimestre" {% if u.cuatrimestre == c ~ ' Cuatrimestre' %}selected{% endif %}>{{ c }} Cuatri</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3"><label class="small fw-bold">Nombre Completo</label><input type="text" class="form-control" name="nombre" value="{{ u.nombre_completo }}" required></div>
+                    
+                    <div class="mb-3">
+                        <label class="small fw-bold">Correo Institucional</label>
+                        <input type="email" class="form-control" name="correo" value="{% if u.correo and u.correo != 'None' %}{{ u.correo }}{% endif %}" placeholder="ejemplo@cut.edu.mx" required>
+                    </div>
+                    
+                    <div class="mb-3"><label class="small fw-bold">Contraseña</label><input type="text" class="form-control" name="contrasena" value="{{ u.contrasena_hash }}" required></div>
+                    
+                    <div class="mb-3">
+                        <label class="small fw-bold">Rol</label>
+                        <select class="form-select" name="rol" required>
+                            <option value="Alumno" {% if u.rol == 'Alumno' %}selected{% endif %}>Alumno</option>
+                            <option value="Maestro" {% if u.rol == 'Maestro' %}selected{% endif %}>Maestro</option>
+                            <option value="Superadmin" {% if u.rol == 'Superadmin' %}selected{% endif %}>Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0 px-4 pb-4"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-primary px-4">Actualizar</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const proximoId = parseInt("{{ next_id }}") || 1; 
+
+    function actualizarFormulario() {
+        const rol = document.getElementById("rolSelect").value;
+        const inputMatricula = document.getElementById("matriculaInput");
+        const seccionAlumno = document.getElementById("seccionAlumno");
+        const carrera = document.getElementById("carreraInput");
+        const cuatri = document.getElementById("cuatriInput");
+        
+        let padId = proximoId.toString().padStart(4, '0');
+        
+        if (rol === "Alumno") {
+            inputMatricula.value = "ALUM-" + padId;
+            seccionAlumno.style.display = "block";  
+            carrera.required = true;
+            cuatri.required = true;
+        } else if (rol === "Maestro") {
+            inputMatricula.value = "DOC-" + padId;
+            seccionAlumno.style.display = "none";   
+            carrera.required = false;
+            cuatri.required = false;
+        } else if (rol === "Superadmin") {
+            inputMatricula.value = "ADM-" + padId;
+            seccionAlumno.style.display = "none";   
+            carrera.required = false;
+            cuatri.required = false;
+        }
+    }
+
+    function generarClave() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; let codigo = '';
+        for(let i=0; i<6; i++) codigo += chars.charAt(Math.floor(Math.random() * chars.length));
+        let claveFinal = 'CUT-' + codigo;
+        document.getElementById('codigoGenerado').innerText = claveFinal;
+        
+        // ¡MAGIA NIVEL DIOS! Guardamos la clave exacta y el tiempo de vida (TTL) desde el panel Admin
+        let expireTime = new Date().getTime() + (5 * 60 * 1000); // 5 Minutos a partir de AHORA
+        localStorage.setItem('AuraLab_GlobalToken', claveFinal);
+        localStorage.setItem('AuraLab_TokenExpiration', expireTime);
+        
+        // El WhatsApp también le avisa que tiene 5 minutos
+        let btnWhats = document.getElementById('btnWhatsapp');
+        btnWhats.style.display = 'block';
+        let mensaje = "¡Hola! Bienvenido a AuraLab. Tu Clave para registrarte como docente es: *" + claveFinal + "* %0A%0AIngresa al portal oficial para darte de alta. %0A%0A⏳ *Nota:* Por seguridad, esta clave expira en 5 minutos.";
+        btnWhats.href = "https://api.whatsapp.com/send?text=" + mensaje;
+    }
+
+    function buscarEnTabla(inputElement, tablaId) {
+        let filtro = inputElement.value.toLowerCase();
+        let filas = document.getElementById(tablaId).getElementsByTagName("tr");
+        for (let i = 1; i < filas.length; i++) {
+            let celdas = filas[i].getElementsByTagName("td");
+            let coincide = false;
+            for (let j = 0; j < celdas.length - 1; j++) {
+                if (celdas[j] && celdas[j].innerText.toLowerCase().indexOf(filtro) > -1) { coincide = true; break; }
+            }
+            filas[i].style.display = coincide ? "" : "none";
+        }
+    }
+
+    // MEMORIA DE PESTAÑAS
+    document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function (event) {
+            localStorage.setItem('pestanaAdministrador', event.target.getAttribute('data-bs-target'));
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        actualizarFormulario(); 
+        let pestanaGuardada = localStorage.getItem('pestanaAdministrador');
+        if (pestanaGuardada) {
+            let botonPestana = document.querySelector('button[data-bs-target="' + pestanaGuardada + '"]');
+            if (botonPestana) {
+                let tab = new bootstrap.Tab(botonPestana);
+                tab.show();
+            }
+        }
+    });
+</script>
+</body>
+</html>

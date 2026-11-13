@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle del Grupo - AuraLab</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        .navbar { background-color: #1a252f; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .card { border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        .input-group-text { background-color: #e9ecef; color: #495057; border-right: 0; font-weight: bold; }
+        
+        .parcial-header { 
+            background-color: #e9ecef; 
+            padding: 12px 18px; 
+            border-radius: 10px; 
+            margin-top: 20px; 
+            margin-bottom: 10px; 
+            font-weight: bold; 
+            color: #2c3e50; 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .parcial-header:hover { background-color: #dde1e5; }
+        .parcial-header .bi-chevron-down { transition: transform 0.3s ease; }
+        .parcial-header[aria-expanded="true"] .bi-chevron-down { transform: rotate(180deg); }
+        .opcion-textarea { resize: vertical; min-height: 55px; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-dark mb-4">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold" href="/panel_maestro"><i class="bi bi-arrow-left-circle me-2"></i> Volver a Mis Grupos</a>
+        <div class="text-light d-flex align-items-center">
+            <span class="me-4 text-white-50"><i class="bi bi-person-badge"></i> Maestro(a): {{ nombre }}</span>
+            <a href="/logout" class="btn btn-outline-light btn-sm" style="border-radius: 8px;">Cerrar Sesión</a>
+        </div>
+    </div>
+</nav>
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">{{ grupo.nombre_materia }}</h2>
+            <span class="badge bg-secondary mt-2">Sección: {{ grupo.seccion }}</span>
+        </div>
+    </div>
+    <!-- PANELES DE CÓDIGOS PARA EL DOCENTE -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3 mb-md-0">
+            <div class="card h-100 shadow-sm border-0" style="border-left: 5px solid #4a90e2;">
+                <div class="card-body text-center bg-light" style="border-radius: 0 12px 12px 0;">
+                    <h6 class="fw-bold text-muted text-uppercase mb-2"><i class="bi bi-person-plus-fill text-primary"></i> Inscripción Estándar</h6>
+                    <p class="text-muted small" style="min-height: 40px;">Comparte este código para que los alumnos se registren y se unan formalmente a tu lista de clase de todo el cuatrimestre.</p>
+                    
+                    {% if grupo.codigo_invitacion %}
+                        <h3 class="text-primary fw-bold mb-2" style="letter-spacing: 2px; background: #fff; padding: 10px; border-radius: 8px; border: 1px dashed #4a90e2;">{{ grupo.codigo_invitacion }}</h3>
+                        <a href="/generar_codigo_clase/{{ grupo.id_grupo }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-repeat"></i> Cambiar Código</a>
+                    {% else %}
+                        <a href="/generar_codigo_clase/{{ grupo.id_grupo }}" class="btn btn-primary fw-bold px-4 mt-2"><i class="bi bi-magic"></i> Generar Código (ALUM-XXXX)</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm border-0" style="border-left: 5px solid #ffc107;">
+                <div class="card-body text-center bg-light" style="border-radius: 0 12px 12px 0;">
+                    <h6 class="fw-bold text-muted text-uppercase mb-2"><i class="bi bi-lightning-charge-fill text-warning"></i> Evaluación Flash (Rápida)</h6>
+                    <p class="text-muted small" style="min-height: 40px;">Genera un PIN temporal. Úsalo proyectándolo en clase para un radar de dudas instantáneo.</p>
+                    
+                    <button type="button" class="btn btn-warning fw-bold text-dark px-4 mt-2" data-bs-toggle="modal" data-bs-target="#modalPrepararFlash">
+                        <i class="bi bi-gear-fill"></i> Preparar Evaluación Flash
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- TABS DE ALUMNOS Y REACTIVOS -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white pt-3 pb-0 border-bottom-0">
+            <ul class="nav nav-tabs" id="grupoTabs">
+                <li class="nav-item">
+                    <button class="nav-link active fw-bold" data-bs-toggle="tab" data-bs-target="#alumnos-pane"><i class="bi bi-people"></i> Alumnos Inscritos</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link fw-bold" data-bs-toggle="tab" data-bs-target="#reactivos-pane"><i class="bi bi-list-check"></i> Banco de Reactivos</button>
+                </li>
+                <!-- NUEVA PESTAÑA DE EXÁMENES APLICADOS -->
+                <li class="nav-item">
+                    <button class="nav-link fw-bold text-primary" data-bs-toggle="tab" data-bs-target="#historialExamenes"><i class="bi bi-clock-history"></i> Exámenes Aplicados</button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content">
+                
+                <!-- PESTAÑA ALUMNOS -->
+                <div class="tab-pane fade show active" id="alumnos-pane">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold text-dark mb-0">Lista de Asistencia / Calificaciones</h6>
+                        <form action="/inscribir_alumno" method="POST" class="d-flex">
+                            <input type="hidden" name="id_grupo" value="{{ grupo.id_grupo }}">
+                            <input type="text" name="matricula_alumno" class="form-control form-control-sm me-2" placeholder="Matrícula del alumno" required>
+                            <button type="submit" class="btn btn-dark btn-sm fw-bold">Inscribir Manual</button>
+                        </form>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="bg-light text-muted small text-uppercase">
+                                <tr>
+                                    <th>Matrícula</th>
+                                    <th>Nombre del Alumno</th>
+                                    <th>Correo</th>
+                                    <th class="text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for a in alumnos %}
+                                <tr>
+                                    <td><span class="badge bg-success">{{ a.matricula }}</span></td>
+                                    <td class="fw-bold text-dark">{{ a.nombre_completo }}</td>
+                                    <td class="text-muted small">{{ a.correo }}</td>
+                                    <td class="text-end">
+                                        <a href="/expulsar_alumno/{{ grupo.id_grupo }}/{{ a.id_usuario }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('¿Dar de baja a este alumno?');"><i class="bi bi-person-x"></i> Expulsar</a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">No hay alumnos inscritos.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- PESTAÑA REACTIVOS -->
+                <div class="tab-pane fade" id="reactivos-pane">
+                    <div class="text-end mb-3">
+                        <button class="btn btn-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalNuevaPregunta">
+                            <i class="bi bi-plus-lg"></i> Agregar Pregunta
+                        </button>
+                    </div>
+                    
+                    {% set parciales = [
+                        ('1er Parcial', 'collapse1'),
+                        ('2do Parcial', 'collapse2'),
+                        ('3er Parcial', 'collapse3'),
+                        ('Examen Final', 'collapseFinal')
+                    ] %}
+                    
+                    {% for p_nombre, p_id in parciales %}
+                        {% set preguntas_parcial = preguntas | selectattr("parcial", "equalto", p_nombre) | list %}
+                        
+                        {% if preguntas_parcial|length > 0 %}
+                            <!-- ENCABEZADO DEL PARCIAL CON BOTÓN DE EXAMEN FORMAL -->
+                            <div class="parcial-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#{{ p_id }}" aria-expanded="true">
+                                <span><i class="bi bi-folder2-open me-2 text-primary"></i> {{ p_nombre }} <span class="badge bg-secondary ms-2">{{ preguntas_parcial|length }} preguntas</span></span>
+                                <div>
+                                    <!-- Botón para lanzar el examen de este parcial específico a los alumnos inscritos -->
+                                    <form action="/lanzar_examen_parcial/{{ grupo.id_grupo }}/{{ p_nombre }}" method="POST" class="d-inline" onclick="event.stopPropagation();">
+                                     <button type="submit" class="btn btn-success btn-sm me-3 shadow-sm" onclick="return confirm('¿Lanzar el examen de {{ p_nombre }} a los alumnos inscritos?');">
+                                       <i class="bi bi-rocket-takeoff-fill"></i> Lanzar Examen a Inscritos
+                                     </button>
+                                    </form>
+                                    <i class="bi bi-chevron-down"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="collapse show" id="{{ p_id }}">
+                                <div class="table-responsive mb-3">
+                                    <table class="table table-hover align-middle border rounded">
+                                        <thead class="bg-light text-muted small text-uppercase">
+                                            <tr>
+                                                <th>Pregunta</th>
+                                                <th>Opciones (A,B,C,D)</th>
+                                                <th>Respuesta Correcta</th>
+                                                <th class="text-end">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for r in preguntas_parcial %}
+                                            <tr>
+                                                <td class="fw-bold">{{ r.texto_pregunta }}</td>
+                                                <td class="small text-muted">
+                                                    A) {{ r.opcion_a }}<br>
+                                                    B) {{ r.opcion_b }}<br>
+                                                    C) {{ r.opcion_c }}<br>
+                                                    D) {{ r.opcion_d }}
+                                                </td>
+                                                <td><span class="badge bg-success">Opción {{ r.respuesta_correcta }}</span></td>
+                                                <td class="text-end text-nowrap">
+                                                    <!-- BOTÓN EDITAR EN EL BANCO -->
+                                                    <button class="btn btn-outline-primary btn-sm me-1" data-bs-toggle="modal" data-bs-target="#modalEditarPregunta{{ r.id_pregunta }}">
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </button>
+                                                    <a href="/eliminar_pregunta/{{ r.id_pregunta }}/{{ grupo.id_grupo }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('¿Borrar esta pregunta?');"><i class="bi bi-trash"></i></a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if preguntas|length == 0 %}
+                        <div class="text-center py-4 text-muted border rounded bg-light">No has agregado preguntas a esta materia.</div>
+                    {% endif %}
+                </div>
+
+                <!-- PESTAÑA HISTORIAL DE EXÁMENES APLICADOS -->
+                <div class="tab-pane fade" id="historialExamenes">
+                    <div class="table-responsive mt-3">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light text-muted small text-uppercase">
+                                <tr>
+                                    <th class="px-3">PIN de Sala</th>
+                                    <th>Estado del Examen</th>
+                                    <th class="text-end px-3">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- PESTAÑA HISTORIAL DE EXÁMENES APLICADOS -->
+                <div class="tab-pane fade" id="historialExamenes">
+                    <div class="table-responsive mt-3">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light text-muted small text-uppercase">
+                                <tr>
+                                    <th class="px-3">PIN de Sala</th>
+                                    <th>Estado del Examen</th>
+                                    <th class="text-end px-3">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sesion in sesiones %}
+                                <tr>
+                                    <td class="fw-bold fs-5 text-dark px-3">{{ sesion.codigo_sala }}</td>
+                                    <td>
+                                        {% if sesion.estado == 'Cerrada' %}
+                                            <span class="badge bg-secondary px-3 py-2"><i class="bi bi-check2-circle"></i> Finalizada</span>
+                                        {% elif sesion.estado == 'Activa' %}
+                                            <span class="badge bg-success px-3 py-2"><i class="bi bi-broadcast"></i> En Curso</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark px-3 py-2"><i class="bi bi-hourglass-split"></i> En Espera (Lobby)</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end px-3">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            {% if sesion.estado == 'Cerrada' %}
+                                                <a href="/radar_dudas/{{ sesion.codigo_sala }}" class="btn btn-outline-primary btn-sm fw-bold">
+                                                    <i class="bi bi-bar-chart-fill me-1"></i> Ver Resultados
+                                                </a>
+                                            {% else %}
+                                                <a href="/sala_activa/{{ sesion.codigo_sala }}" class="btn btn-warning btn-sm fw-bold text-dark">
+                                                    <i class="bi bi-box-arrow-in-right me-1"></i> Volver a la Sala
+                                                </a>
+                                            {% endif %}
+                                            
+                                            <!-- NUEVO BOTÓN PARA ELIMINAR EL EXAMEN -->
+                                            <a href="/eliminar_examen/{{ sesion.codigo_sala }}" class="btn btn-outline-danger btn-sm fw-bold" onclick="return confirm('¿Estás seguro de eliminar este examen aplicado? Se borrarán sus resultados y registros.');">
+                                                <i class="bi bi-trash-fill"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-5">
+                                        <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                                        Aún no hay exámenes aplicados en este grupo.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL DE EDICIÓN PARA CADA PREGUNTA DEL BANCO ================= -->
+{% for r in preguntas %}
+<div class="modal fade" id="modalEditarPregunta{{ r.id_pregunta }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+            <div class="modal-header bg-light border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-square text-primary"></i> Editar Pregunta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/editar_pregunta" method="POST">
+                <div class="modal-body p-4" style="max-height: 70vh; overflow-y: auto;">
+                    <input type="hidden" name="id_grupo" value="{{ grupo.id_grupo }}">
+                    <input type="hidden" name="id_pregunta" value="{{ r.id_pregunta }}">
+                    
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted">¿A qué parcial pertenece?</label>
+                        <select class="form-select bg-light border-0" name="parcial" required>
+                            <option value="1er Parcial" {% if r.parcial == '1er Parcial' %}selected{% endif %}>1er Parcial</option>
+                            <option value="2do Parcial" {% if r.parcial == '2do Parcial' %}selected{% endif %}>2do Parcial</option>
+                            <option value="3er Parcial" {% if r.parcial == '3er Parcial' %}selected{% endif %}>3er Parcial</option>
+                            <option value="Examen Final" {% if r.parcial == 'Examen Final' %}selected{% endif %}>Examen Final</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted">Texto de la Pregunta</label>
+                        <textarea class="form-control bg-light border-0" name="texto_pregunta" rows="3" required>{{ r.texto_pregunta }}</textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <div class="input-group input-group-sm h-100"><span class="input-group-text">A</span><textarea class="form-control opcion-textarea" name="opcion_a" required>{{ r.opcion_a }}</textarea></div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="input-group input-group-sm h-100"><span class="input-group-text">B</span><textarea class="form-control opcion-textarea" name="opcion_b" required>{{ r.opcion_b }}</textarea></div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="input-group input-group-sm h-100"><span class="input-group-text">C</span><textarea class="form-control opcion-textarea" name="opcion_c" required>{{ r.opcion_c }}</textarea></div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="input-group input-group-sm h-100"><span class="input-group-text">D</span><textarea class="form-control opcion-textarea" name="opcion_d" required>{{ r.opcion_d }}</textarea></div>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <label class="small fw-bold text-muted">¿Cuál es la correcta?</label>
+                        <select class="form-select form-select-sm border-primary" name="respuesta_correcta" required>
+                            <option value="A" {% if r.respuesta_correcta == 'A' %}selected{% endif %}>Opción A</option>
+                            <option value="B" {% if r.respuesta_correcta == 'B' %}selected{% endif %}>Opción B</option>
+                            <option value="C" {% if r.respuesta_correcta == 'C' %}selected{% endif %}>Opción C</option>
+                            <option value="D" {% if r.respuesta_correcta == 'D' %}selected{% endif %}>Opción D</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0 bg-light py-3">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">Actualizar Pregunta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- ================= MODAL 1: AGREGAR PREGUNTA AL BANCO PRINCIPAL ================= -->
+<div class="modal fade" id="modalNuevaPregunta" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+            <div class="modal-header bg-light border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-patch-question-fill text-primary"></i> Nueva Pregunta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/crear_pregunta" method="POST">
+                <div class="modal-body p-4" style="max-height: 70vh; overflow-y: auto;">
+                    <input type="hidden" name="id_grupo" value="{{ grupo.id_grupo }}">
+                    <input type="hidden" name="materia" value="{{ grupo.nombre_materia }}">
+                    
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted">¿A qué parcial pertenece?</label>
+                        <select class="form-select bg-light border-0" name="parcial" required>
+                            <option value="1er Parcial">1er Parcial</option>
+                            <option value="2do Parcial">2do Parcial</option>
+                            <option value="3er Parcial">3er Parcial</option>
+                            <option value="Examen Final">Examen Final</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted">Texto de la Pregunta</label>
+                        <textarea class="form-control bg-light border-0" name="texto_pregunta" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <div class="input-group input-group-sm h-100"><span class="input-group-text">A</span><textarea class="form-control opcion-textarea" name="opcion_a" required></textarea></div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="input-group input-group-sm h-100"><span class="input-group-text">B</span><textarea class="form-control opcion-textarea" name="opcion_b" required></textarea></div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="input-group input-group-sm h-100"><span class="input-group-text">C</span><textarea class="form-control opcion-textarea" name="opcion_c" required></textarea></div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="input-group input-group-sm h-100"><span class="input-group-text">D</span><textarea class="form-control opcion-textarea" name="opcion_d" required></textarea></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-2">
+                        <label class="small fw-bold text-muted">¿Cuál es la correcta?</label>
+                        <select class="form-select form-select-sm border-primary" name="respuesta_correcta" required>
+                            <option value="A">Opción A</option><option value="B">Opción B</option>
+                            <option value="C">Opción C</option><option value="D">Opción D</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0 bg-light py-3">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">Guardar Pregunta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL 2: PREPARAR EVALUACIÓN FLASH ================= -->
+<div class="modal fade" id="modalPrepararFlash" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+            <div class="modal-header bg-warning border-bottom-0 pb-3">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-lightning-charge-fill"></i> Configurar Evaluación Rápida</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <form action="/crear_sala" method="POST" id="formFlash">
+                <input type="hidden" name="id_grupo" value="{{ grupo.id_grupo }}">
+                
+                <div class="modal-body p-4 bg-light" style="max-height: 70vh; overflow-y: auto;">
+                    <p class="text-muted small mb-4">Crea tu examen rápido (Máximo 20 preguntas). Estas preguntas no se guardarán en tu banco de reactivos final, son exclusivas para esta dinámica en vivo.</p>
+                    
+                    <div id="contenedorPreguntasFlash">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-dark text-white fw-bold py-2"><i class="bi bi-1-circle-fill text-warning"></i> Pregunta 1</div>
+                            <div class="card-body">
+                                <textarea class="form-control mb-3" name="pregunta_1" rows="2" placeholder="Ej. ¿Para qué sirve la etiqueta <div>?" required></textarea>
+                                
+                                <div class="row">
+                                    <div class="col-6 mb-3">
+                                        <div class="input-group input-group-sm h-100"><span class="input-group-text">A</span><textarea class="form-control opcion-textarea" name="opcion_a_1" required></textarea></div>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <div class="input-group input-group-sm h-100"><span class="input-group-text">B</span><textarea class="form-control opcion-textarea" name="opcion_b_1" required></textarea></div>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <div class="input-group input-group-sm h-100"><span class="input-group-text">C</span><textarea class="form-control opcion-textarea" name="opcion_c_1" required></textarea></div>
+                                    </div>
+                                    <div class="col-6 mb-3">
+                                        <div class="input-group input-group-sm h-100"><span class="input-group-text">D</span><textarea class="form-control opcion-textarea" name="opcion_d_1" required></textarea></div>
+                                    </div>
+                                </div>
+                                
+                                <select class="form-select form-select-sm mt-2 border-primary w-50" name="correcta_1" required>
+                                    <option value="" disabled selected>Selecciona la correcta...</option>
+                                    <option value="A">Opción A</option><option value="B">Opción B</option>
+                                    <option value="C">Opción C</option><option value="D">Opción D</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3 pb-2">
+                        <button type="button" class="btn btn-outline-primary fw-bold btn-sm" id="btnAgregarPreguntaFlash">
+                            <i class="bi bi-plus-circle-fill"></i> Agregar otra pregunta
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="modal-footer border-top-0 pt-3 bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning fw-bold text-dark px-4"><i class="bi bi-play-fill"></i> Generar PIN y Arrancar Examen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function (event) {
+            localStorage.setItem('pestanaGrupoDetalle', event.target.getAttribute('data-bs-target'));
+        });
+    });
+    document.addEventListener("DOMContentLoaded", function() {
+        let pestanaGuardada = localStorage.getItem('pestanaGrupoDetalle');
+        if (pestanaGuardada) {
+            let botonPestana = document.querySelector('button[data-bs-target="' + pestanaGuardada + '"]');
+            if (botonPestana) {
+                let tab = new bootstrap.Tab(botonPestana);
+                tab.show();
+            }
+        }
+    });
+
+    let contadorPreguntasFlash = 1;
+    document.getElementById('btnAgregarPreguntaFlash').addEventListener('click', function() {
+        if(contadorPreguntasFlash >= 20) {
+            alert("El límite máximo para una evaluación flash es de 20 preguntas.");
+            return;
+        }
+        
+        contadorPreguntasFlash++;
+        const contenedor = document.getElementById('contenedorPreguntasFlash');
+        
+        const htmlNuevaPregunta = `
+            <div class="card border-0 shadow-sm mb-4" id="caja_pregunta_${contadorPreguntasFlash}">
+                <div class="card-header bg-dark text-white fw-bold py-2 d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-${contadorPreguntasFlash}-circle-fill text-warning"></i> Pregunta ${contadorPreguntasFlash}</span>
+                    <button type="button" class="btn btn-sm btn-danger py-0 px-2" onclick="document.getElementById('caja_pregunta_${contadorPreguntasFlash}').remove()">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </button>
+                </div>
+                <div class="card-body">
+                    <textarea class="form-control mb-3" name="pregunta_${contadorPreguntasFlash}" rows="2" placeholder="Ej. ¿Qué es...?" required></textarea>
+                    <div class="row">
+                        <div class="col-6 mb-3"><div class="input-group input-group-sm h-100"><span class="input-group-text">A</span><textarea class="form-control opcion-textarea" name="opcion_a_${contadorPreguntasFlash}" required></textarea></div></div>
+                        <div class="col-6 mb-3"><div class="input-group input-group-sm h-100"><span class="input-group-text">B</span><textarea class="form-control opcion-textarea" name="opcion_b_${contadorPreguntasFlash}" required></textarea></div></div>
+                        <div class="col-6 mb-3"><div class="input-group input-group-sm h-100"><span class="input-group-text">C</span><textarea class="form-control opcion-textarea" name="opcion_c_${contadorPreguntasFlash}" required></textarea></div></div>
+                        <div class="col-6 mb-3"><div class="input-group input-group-sm h-100"><span class="input-group-text">D</span><textarea class="form-control opcion-textarea" name="opcion_d_${contadorPreguntasFlash}" required></textarea></div></div>
+                    </div>
+                    <select class="form-select form-select-sm mt-2 border-primary w-50" name="correcta_${contadorPreguntasFlash}" required>
+                        <option value="" disabled selected>Selecciona la correcta...</option>
+                        <option value="A">Opción A</option><option value="B">Opción B</option>
+                        <option value="C">Opción C</option><option value="D">Opción D</option>
+                    </select>
+                </div>
+            </div>
+        `;
+        
+        contenedor.insertAdjacentHTML('beforeend', htmlNuevaPregunta);
+        const modalBody = document.querySelector('#modalPrepararFlash .modal-body');
+        modalBody.scrollTop = modalBody.scrollHeight;
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+Flask
+Flask-SocketIO
+PyMySQL
+gunicorn
+eventlet

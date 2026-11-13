@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Evaluación en Vivo - AuraLab</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #1a252f; color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        .card { border-radius: 16px; background-color: #ffffff; color: #333; transition: all 0.3s ease; }
+        .form-check-input:checked { background-color: #ffc107; border-color: #ffc107; }
+        .cursor-pointer { cursor: pointer; }
+        .option-label:hover { background-color: #f8f9fa; }
+        
+        #alertaAntiTrampa { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(220, 53, 69, 0.98); z-index: 9999; text-align: center; padding-top: 15vh; 
+        }
+        
+        /* Estilos para la pregunta castigada */
+        .pregunta-anulada { border: 3px solid #dc3545 !important; background-color: #fff5f5 !important; pointer-events: none; opacity: 0.8; }
+    </style>
+</head>
+<body>
+<!-- ALERTA ANTI-TRAMPA -->
+<div id="alertaAntiTrampa">
+    <div class="container">
+        <i class="bi bi-exclamation-triangle-fill display-1 text-white mb-4 d-block"></i>
+        <h1 class="fw-bold text-white display-4">¡ADVERTENCIA DE SEGURIDAD!</h1>
+        <p id="textoAlerta" class="lead text-white mt-3">El sistema ha detectado que saliste de la pantalla de la evaluación.</p>
+        <div class="bg-dark bg-opacity-25 p-4 rounded-4 d-inline-block mt-3 mb-4 text-start">
+            <h5 class="text-warning fw-bold mb-2"><i class="bi bi-shield-lock-fill"></i> Sanción Aplicada:</h5>
+            <p id="textoSancion" class="text-white mb-0">Se ha anulado y bloqueado tu pregunta actual. Serás enviado a la siguiente pregunta.</p>
+        </div>
+        <br>
+        <button id="btnEntendido" class="btn btn-light btn-lg fw-bold text-danger px-5 mt-2 shadow" onclick="cerrarAdvertencia()">Entendido, volver al examen</button>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold"><i class="bi bi-lightning-charge-fill text-warning"></i> Evaluación Activa</h2>
+                <p class="text-white-50">Responde con atención. Sala: <span class="badge bg-warning text-dark fs-6">{{ pin }}</span></p>
+            </div>
+            
+            <form action="/guardar_respuestas_flash" method="POST" id="formExamen">
+                <input type="hidden" name="pin" value="{{ pin }}">
+                
+                {% for p in preguntas %}
+                <div class="card shadow-sm border-0 mb-4 p-4 bloque-pregunta" id="bloque_{{ p.id_pregunta_flash }}">
+                    <h5 class="fw-bold text-dark mb-4 lh-base">
+                        <span class="badge bg-dark text-warning me-2">{{ loop.index }}</span> {{ p.texto_pregunta }}
+                    </h5>
+                    
+                    <div class="d-flex flex-column gap-3 contenedor-opciones">
+                        <label class="p-3 border rounded cursor-pointer option-label d-flex align-items-center">
+                            <input type="radio" class="form-check-input me-3" style="transform: scale(1.3);" name="pregunta_{{ p.id_pregunta_flash }}" value="A" required> 
+                            <span><strong class="text-muted me-2">A)</strong> {{ p.opcion_a }}</span>
+                        </label>
+                        <label class="p-3 border rounded cursor-pointer option-label d-flex align-items-center">
+                            <input type="radio" class="form-check-input me-3" style="transform: scale(1.3);" name="pregunta_{{ p.id_pregunta_flash }}" value="B" required> 
+                            <span><strong class="text-muted me-2">B)</strong> {{ p.opcion_b }}</span>
+                        </label>
+                        <label class="p-3 border rounded cursor-pointer option-label d-flex align-items-center">
+                            <input type="radio" class="form-check-input me-3" style="transform: scale(1.3);" name="pregunta_{{ p.id_pregunta_flash }}" value="C" required> 
+                            <span><strong class="text-muted me-2">C)</strong> {{ p.opcion_c }}</span>
+                        </label>
+                        <label class="p-3 border rounded cursor-pointer option-label d-flex align-items-center">
+                            <input type="radio" class="form-check-input me-3" style="transform: scale(1.3);" name="pregunta_{{ p.id_pregunta_flash }}" value="D" required> 
+                            <span><strong class="text-muted me-2">D)</strong> {{ p.opcion_d }}</span>
+                        </label>
+                    </div>
+                </div>
+                {% else %}
+                <div class="card text-center p-5">
+                    <h5 class="text-muted">No hay preguntas configuradas para esta sala todavía.</h5>
+                </div>
+                {% endfor %}
+                
+                {% if preguntas|length > 0 %}
+                <div class="text-center pt-3 pb-5">
+                    <button type="submit" class="btn btn-warning btn-lg fw-bold text-dark px-5 py-3 shadow-lg" style="border-radius: 12px; font-size: 1.2rem;">
+                        <i class="bi bi-send-fill me-2"></i> Enviar Respuestas
+                    </button>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ================= SISTEMA ANTI-TRAMPA CON SALTO Y AUTO-ENVÍO =================
+    document.addEventListener("visibilitychange", function() {
+        if (document.hidden) {
+            let form = document.getElementById('formExamen');
+            let preguntas = document.querySelectorAll('.bloque-pregunta');
+            let castigoAplicado = false;
+            let totalSinContestar = 0;
+            
+            // Mostrar la pantalla de alerta bloqueante
+            document.getElementById('alertaAntiTrampa').style.display = 'block';
+            
+            // 1. Contar cuántas preguntas faltan por contestar en total
+            preguntas.forEach(bloque => {
+                let respondida = bloque.querySelector('input[type="radio"]:checked');
+                let anulada = bloque.classList.contains('pregunta-anulada');
+                if (!respondida && !anulada) { totalSinContestar++; }
+            });
+
+            // 2. Buscar la primera pregunta disponible y castigarla
+            for (let i = 0; i < preguntas.length; i++) {
+                let bloque = preguntas[i];
+                let respondida = bloque.querySelector('input[type="radio"]:checked');
+                
+                if (!respondida && !bloque.classList.contains('pregunta-anulada') && !castigoAplicado) {
+                    // Aplicar el bloqueo visual y deshabilitar opciones
+                    bloque.classList.add('pregunta-anulada');
+                    let radios = bloque.querySelectorAll('input[type="radio"]');
+                    radios.forEach(radio => {
+                        radio.disabled = true;
+                        radio.required = false; 
+                    });
+                    
+                    // Crear el valor "TRAMPA" para que Python lo repruebe
+                    let inputOculto = document.createElement('input');
+                    inputOculto.type = 'hidden';
+                    inputOculto.name = radios[0].name; 
+                    inputOculto.value = 'TRAMPA';
+                    bloque.appendChild(inputOculto);
+                    
+                    // Inyectar el mensaje en la pregunta
+                    bloque.insertAdjacentHTML('beforeend', `
+                        <div class="alert alert-danger mt-4 mb-0 fw-bold d-flex align-items-center">
+                            <i class="bi bi-x-circle-fill me-2 fs-5"></i> 
+                            <div>Pregunta anulada automáticamente por abandonar la pantalla.</div>
+                        </div>
+                    `);
+                    
+                    castigoAplicado = true;
+                    totalSinContestar--; 
+
+                    // 3. Evaluar si era la última pregunta
+                    if (totalSinContestar === 0) {
+                        // Cambiamos los textos de la alerta y ocultamos el botón
+                        document.getElementById('textoAlerta').innerText = "Has intentado salir en tu última pregunta.";
+                        document.getElementById('textoSancion').innerText = "Se anuló tu última pregunta. El examen finalizará y se enviará automáticamente.";
+                        document.getElementById('btnEntendido').style.display = 'none';
+                        
+                        // Forzamos el envío del examen en 3 segundos para que alcance a leer el regaño
+                        setTimeout(() => { form.submit(); }, 3000); 
+                    } else {
+                        // Si aún hay preguntas, preparamos el "salto" a la siguiente
+                        for (let j = i + 1; j < preguntas.length; j++) {
+                             let respSig = preguntas[j].querySelector('input[type="radio"]:checked');
+                             let anulSig = preguntas[j].classList.contains('pregunta-anulada');
+                             if (!respSig && !anulSig) {
+                                 // Hacemos scroll suave hasta la siguiente pregunta disponible
+                                 setTimeout(() => {
+                                     preguntas[j].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                 }, 500);
+                                 break;
+                             }
+                        }
+                    }
+                    break; // Cortamos el ciclo para castigar solo 1 pregunta por cada vez que se sale
+                }
+            }
+        }
+    });
+
+    // Función para cerrar la pantalla de advertencia
+    function cerrarAdvertencia() {
+        document.getElementById('alertaAntiTrampa').style.display = 'none';
+    }
+</script>
+</body>
+</html>
