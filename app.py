@@ -154,7 +154,7 @@ def entrar_sala():
 # ================= REGISTRO DE NUEVOS USUARIOS VÍA CÓDIGOS =================
 @app.route('/registro_docente', methods=['POST'])
 def registro_docente():
-    nombre = request.form['nombre']
+    nombre_pila = request.form['nombre'].strip() apellidos = request.form['apellidos'].strip() nombre = f"{nombre_pila} {apellidos}"
     correo = request.form['correo']
     contrasena = request.form['contrasena']
     conexion = obtener_conexion()
