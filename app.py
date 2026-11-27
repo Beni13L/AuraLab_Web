@@ -184,9 +184,9 @@ def registro_alumno_codigo():
     contrasena = request.form['contrasena']
     
     conexion = obtener_conexion()
-    cursor = conexion.cursor()
-    cursor.execute("SELECT id_grupo FROM Grupos WHERE codigo_invitacion = %s", (codigo,))
-    grupo = cursor.fetchone()
+    with conexion.cursor() as cursor:
+        cursor.execute("SELECT id_grupo FROM Grupos WHERE codigo_invitacion = %s", (codigo,))
+        grupo = cursor.fetchone()
     
         if not grupo:
             conexion.close()
