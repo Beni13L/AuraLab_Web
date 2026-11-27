@@ -21,6 +21,7 @@
                 <p class="text-muted fw-bold">Aciertos totales</p>
                 <a href="/portal_alumno" class="btn btn-outline-primary mt-2">Volver a mi Portal</a>
             </div>
+            {% if publicado %}
             <h5 class="fw-bold text-white mb-3">Desglose de Preguntas</h5>
             {% for r in respuestas %}
             <div class="card shadow-sm border-0 mb-3 p-3 {% if r.es_correcta %} border-start border-success border-5 {% else %} border-start border-danger border-5 {% endif %}">
@@ -33,6 +34,9 @@
                 </div>
             </div>
             {% endfor %}
+            {% else %}
+            <div class="alert alert-warning">Tu maestro aún no publica la corrección. Verás el desglose cuando él lo autorice.</div>
+{% endif %}
         </div>
     </div>
 </div>
