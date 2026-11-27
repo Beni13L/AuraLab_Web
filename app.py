@@ -170,7 +170,7 @@ def registro_docente():
 
 @app.route('/registro_alumno_codigo', methods=['POST'])
 def registro_alumno_codigo():
-    codigo = request.form['codigo_clase']
+    codigo = request.form['codigo_clase'].strip().upper()
     matricula = request.form['matricula'].upper().strip()
     
     # Recibimos nombre y apellidos por separado y los unimos
@@ -184,9 +184,13 @@ def registro_alumno_codigo():
     contrasena = request.form['contrasena']
     
     conexion = obtener_conexion()
-    with conexion.cursor() as cursor:
-        cursor.execute("SELECT id_grupo FROM Grupos WHERE codigo_invitacion = %s", (codigo,))
-        grupo = cursor.fetchone()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT id_grupo FROM Grupos WHERE codigo_invitacion = %s", (codigo,))
+    grupo = cursor.fetchone()
+    
+        if not grupo:
+            conexion.close()
+            return "Código de clase inválido. Verifica el código ALUM- con tu maestro.", 400
         
         if grupo:
             cursor.execute("SELECT id_usuario FROM Usuarios WHERE matricula = %s", (matricula,))
