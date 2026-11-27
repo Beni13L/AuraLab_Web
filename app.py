@@ -612,11 +612,10 @@ def radar_dudas(pin):
        
 
     conexion.close()
-    return render_template('radar_dudas.html', pin=pin, estadisticas=estadisticas, 
-                           calificaciones=calificaciones, total_preguntas=total_preguntas, 
-                           detalles=detalles_por_alumno, alumnos_por_pregunta=alumnos_por_pregunta)
-                           detalles=detalles_por_alumno, alumnos_por_pregunta=alumnos_por_pregunta, publicado=publicado, estado=estado)
-
+    return render_template('radar_dudas.html', pin=pin, estadisticas=estadisticas,
+                       calificaciones=calificaciones, total_preguntas=total_preguntas,
+                       detalles=detalles_por_alumno, alumnos_por_pregunta=alumnos_por_pregunta, publicado=publicado, estado=estado)
+    
 # ================= EXAMEN FLASH (LÓGICA DEL ALUMNO) =================
 @app.route('/sala_espera/<pin>')
 def sala_espera(pin):
