@@ -5,29 +5,57 @@
     <title>Radar de Dudas - AuraLab</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f2f6fb; font-family: 'Segoe UI', Tahoma, sans-serif; color: #0d1b3e; }
-        .navbar { background: linear-gradient(90deg, #0d1b3e 0%, #123a7d 100%); }
+        body { background: radial-gradient(900px 420px at 88% -10%, rgba(10,125,255,.09), transparent 60%), radial-gradient(720px 380px at -8% 18%, rgba(0,201,183,.08), transparent 60%), #f2f6fb; font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; color: #0d1b3e; }
+        h1, h2, h3, h4, h5, h6, .btn-primary, .btn-success, .modal-title { font-family: 'Sora', 'Plus Jakarta Sans', system-ui, sans-serif; }
+        h1 { letter-spacing: -.02em; }
+        h1 .bi-radar { background: linear-gradient(90deg, #0a7dff, #00c9b7); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .navbar { background: linear-gradient(90deg, #0d1b3e 0%, #123a7d 100%); box-shadow: 0 4px 12px rgba(13,27,62,0.18); }
         .navbar-brand img { vertical-align: middle; }
         .brand-simbolo { height: 34px; }
         .brand-nombre { height: 24px; }
-        .card { border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(13,27,62,0.06); background-color: #fff; }
-        .alerta-temprana { background-color: #fff3cd; color: #856404; border-radius: 8px; font-size: 0.9rem; }
-        .progress { height: 10px; border-radius: 5px; background-color: #e9ecef; }
-        .btn-primary { background: linear-gradient(90deg, #0a7dff 0%, #00c9b7 100%); border: none; }
-        .btn-primary:hover { filter: brightness(1.08); }
-        .btn-success { background: linear-gradient(90deg, #0a7dff 0%, #00c9b7 100%); border: none; }
-        .btn-success:hover { filter: brightness(1.08); }
+        .card { border-radius: 16px; border: 1px solid rgba(255,255,255,.7); box-shadow: 0 10px 30px rgba(13,27,62,.08); background-color: rgba(255,255,255,.92); position: relative; overflow: hidden; }
+        .card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #0a7dff, #00c9b7); }
+        .alerta-temprana { background: linear-gradient(90deg, rgba(255,193,7,.16), rgba(255,193,7,.07)); color: #7a5b00; border: 1px solid rgba(255,193,7,.45); border-radius: 12px; font-size: 0.9rem; }
+        .progress { height: 12px; border-radius: 999px; background-color: #e8edf4; box-shadow: inset 0 1px 3px rgba(13,27,62,.08); overflow: hidden; }
+        .progress-bar { border-radius: 999px; }
+        .progress-bar.bg-success { background: linear-gradient(90deg, #12b76a, #00c9b7) !important; }
+        .progress-bar.bg-danger { background: linear-gradient(90deg, #f04438, #f97066) !important; }
+        .btn-primary { background: linear-gradient(90deg, #0a7dff 0%, #00c9b7 100%); border: none; border-radius: 10px; font-weight: 700; box-shadow: 0 6px 16px rgba(10,125,255,.28); transition: transform .15s ease, box-shadow .15s ease, filter .15s ease; }
+        .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 10px 22px rgba(10,125,255,.34); }
+        .btn-success { background: linear-gradient(90deg, #0a7dff 0%, #00c9b7 100%); border: none; border-radius: 10px; font-weight: 700; box-shadow: 0 6px 16px rgba(10,125,255,.28); transition: transform .15s ease, box-shadow .15s ease, filter .15s ease; }
+        .btn-success:hover { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 10px 22px rgba(10,125,255,.34); }
+        .btn-outline-dark { border-radius: 10px; font-weight: 600; transition: transform .15s ease, box-shadow .15s ease; }
+        .btn-outline-dark:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(13,27,62,.12); }
+        .btn-outline-primary { border-radius: 10px; font-weight: 600; }
         .modal-header.bg-dark, .card-header.bg-dark { background: linear-gradient(90deg, #0d1b3e 0%, #123a7d 100%) !important; }
+        .modal-content { border-radius: 16px; border: none; box-shadow: 0 24px 60px rgba(13,27,62,.25); overflow: hidden; }
+        .table th { color: #5a6b85; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: .08em; }
+        .table-hover tbody tr:hover { background-color: rgba(10,125,255,.05); }
+        .card > .bg-light { background: linear-gradient(180deg, #f6f9fd, #eef3fa) !important; border: 1px solid rgba(13,27,62,.06); }
+        .card .mb-1.text-muted.small.fw-bold { text-transform: uppercase; letter-spacing: .08em; font-size: 11px; }
+        .badge { letter-spacing: .02em; font-weight: 600; }
+        .badge.bg-dark { background: linear-gradient(90deg, #0d1b3e, #123a7d) !important; }
+        .badge.bg-success { background: linear-gradient(90deg, #12b76a, #00c9b7) !important; }
+        .badge.bg-danger { background: linear-gradient(90deg, #e5484d, #f97066) !important; }
+        .badge.bg-warning { background: linear-gradient(90deg, #f79009, #fdb022) !important; color: #0d1b3e !important; }
         .container { position: relative; }
         .wm-panel { position: absolute; right: 0; top: 0; width: 180px; opacity: 0.05; pointer-events: none; }
-        
+        .print-header { display: none; }
+
         @media print {
-            .navbar, .btn { display: none !important; }
+            @page { margin: 14mm; }
+            .navbar, .btn, .modal { display: none !important; }
             body { background-color: #ffffff; }
             .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; break-inside: avoid; }
+            .card::before { display: none; }
             .container { max-width: 100% !important; padding: 0 !important; }
             .alerta-temprana { border: 1px solid #ffeeba; }
+            .wm-panel { opacity: .08; }
+            .print-header { display: flex !important; align-items: center; }
+            h1 .bi-radar { background: none !important; color: #0a7dff !important; -webkit-text-fill-color: #0a7dff; }
+            .print-header, .card, .badge, .progress-bar, .progress, .modal-header.bg-dark, .card-header.bg-dark, .alerta-temprana { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
     </style>
 </head>
@@ -205,6 +233,11 @@
         <div class="row mt-5">
             <div class="col-12">
                 <div class="card shadow-sm border-0" id="tarjetaTablaCalificaciones" style="border-radius: 16px;">
+                    <div class="print-header" style="margin-bottom:18px;padding-bottom:14px;border-bottom:3px solid #0d1b3e;">
+                        <img src="{{ url_for('static', filename='img/logo-simbolo.png') }}" alt="AuraLab" style="height:42px;vertical-align:middle;">
+                        <img src="{{ url_for('static', filename='img/logo-nombre.png') }}" alt="AuraLab" style="height:28px;vertical-align:middle;margin-left:8px;">
+                        <span style="font-size:18px;font-weight:700;color:#0d1b3e;vertical-align:middle;margin-left:12px;">AuraLab — Reporte de Evaluación</span>
+                    </div>
                     <div class="card-header bg-dark text-white p-3 d-flex justify-content-between align-items-center" style="border-radius: 16px 16px 0 0;">
                         <h5 class="mb-0 fw-bold"><i class="bi bi-card-list me-2"></i> Reporte Individual de Calificaciones</h5>
                         <button class="btn btn-sm btn-light fw-bold shadow-sm" onclick="imprimirListaCalificaciones()">

@@ -5,21 +5,31 @@
     <title>Portal Docente - AuraLab</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f2f6fb; font-family: 'Segoe UI', Tahoma, sans-serif; color: #0d1b3e; }
+        body { background: radial-gradient(900px 420px at 88% -10%, rgba(10,125,255,.09), transparent 60%), radial-gradient(720px 380px at -8% 18%, rgba(0,201,183,.08), transparent 60%), #f2f6fb; font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; color: #0d1b3e; }
+        h1, h2, h3, h4, h5, h6, .btn-primary, .card-header h6, .modal-title { font-family: 'Sora', 'Plus Jakarta Sans', system-ui, sans-serif; }
         .navbar { background: linear-gradient(90deg, #0d1b3e 0%, #123a7d 100%); box-shadow: 0 4px 12px rgba(13,27,62,0.18); }
         .navbar-brand img { vertical-align: middle; }
         .brand-simbolo { height: 34px; }
         .brand-nombre { height: 24px; }
-        .card { border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(13,27,62,0.06); overflow: hidden; position: relative; background-color: #fff; }
-        .card-header { border-bottom: 1px solid rgba(13,27,62,0.06); background-color: #fff; }
-        .form-control, .form-select { border-radius: 10px; background-color: #f8f9fa; border: 1px solid #e1e5eb; padding: 10px 15px; }
+        .card { border-radius: 16px; border: 1px solid rgba(255,255,255,.7); box-shadow: 0 10px 30px rgba(13,27,62,.08); overflow: hidden; position: relative; background-color: rgba(255,255,255,.92); }
+        .card-header { border-bottom: 1px solid rgba(13,27,62,0.06); background-color: rgba(255,255,255,.75); }
+        .form-label { text-transform: uppercase; letter-spacing: .08em; font-size: .72rem; color: #5a6b85 !important; }
+        .form-control, .form-select { border-radius: 10px; background-color: #f8f9fa; border: 1px solid #e1e5eb; padding: 10px 15px; font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; }
         .form-control:focus, .form-select:focus { border-color: #0a7dff; box-shadow: 0 0 0 0.25rem rgba(10,125,255,0.18); background-color: #fff; }
-        .btn-primary { background: linear-gradient(90deg, #0a7dff 0%, #00c9b7 100%); border: none; border-radius: 10px; font-weight: 600; padding: 10px; }
-        .btn-primary:hover { filter: brightness(1.08); }
-        .sala-card { background: linear-gradient(135deg, #0a7dff 0%, #00c9b7 100%); color: white; }
-        .table th { color: #6c757d; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; }
+        .btn-primary { background: linear-gradient(90deg, #0a7dff 0%, #00c9b7 100%); border: none; border-radius: 10px; font-weight: 700; padding: 10px; box-shadow: 0 6px 16px rgba(10,125,255,.28); transition: transform .15s ease, box-shadow .15s ease, filter .15s ease; }
+        .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); box-shadow: 0 10px 22px rgba(10,125,255,.34); }
+        .btn-light { border-radius: 10px; font-weight: 600; transition: transform .15s ease, box-shadow .15s ease; }
+        .btn-light:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(13,27,62,.12); }
+        .sala-card { background: linear-gradient(135deg, #0a7dff 0%, #00c9b7 100%); color: white; box-shadow: 0 14px 34px rgba(10,125,255,.30); }
+        .sala-card h4 { letter-spacing: -.01em; }
+        .sala-card .btn-light { box-shadow: 0 8px 20px rgba(13,27,62,.25); }
+        .table th { color: #5a6b85; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: .08em; }
         .table td { vertical-align: middle; }
+        .table-hover tbody tr:hover { background-color: rgba(10,125,255,.05); }
+        .badge.bg-secondary { background: linear-gradient(90deg, rgba(10,125,255,.14), rgba(0,201,183,.14)) !important; color: #0d1b3e !important; border: 1px solid rgba(10,125,255,.25); font-weight: 600; }
+        .modal-content { border-radius: 16px; border: none; box-shadow: 0 24px 60px rgba(13,27,62,.25); }
         .wm-card { position: absolute; right: -12px; bottom: -12px; width: 160px; opacity: 0.05; pointer-events: none; }
     </style>
 </head>

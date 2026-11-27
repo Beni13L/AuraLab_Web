@@ -5,21 +5,43 @@
     <title>Portal del Alumno - AuraLab</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f2f6fb; font-family: 'Segoe UI', Tahoma, sans-serif; color: #0d1b3e; }
-        .navbar { background-color: #ffffff !important; box-shadow: 0 4px 12px rgba(13,27,62,0.08); }
+        :root { --navy: #0d1b3e; --blue: #0a7dff; --teal: #00c9b7; --muted: #5a6b85; --line: #e6ecf5; }
+        body { background: radial-gradient(900px 480px at 88% -8%, rgba(10,125,255,.09), transparent 60%), radial-gradient(720px 420px at -8% 12%, rgba(0,201,183,.08), transparent 60%), #f2f6fb; font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; color: #0d1b3e; }
+        h1, h2, h3, h4, h5, h6, .btn { font-family: 'Sora', 'Plus Jakarta Sans', system-ui, sans-serif; }
+        .navbar { background: rgba(255,255,255,.92) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 4px 16px rgba(13,27,62,0.08); border-bottom: 1px solid rgba(255,255,255,.7); }
         .navbar .text-white-50 { color: rgba(13,27,62,.6) !important; }
         .navbar .text-light { color: #0d1b3e !important; }
-        .navbar .btn-outline-light { color: #0d1b3e; border-color: #0d1b3e; }
-        .navbar .btn-outline-light:hover { background-color: #0d1b3e; color: #fff; }
-        .card { border-radius: 16px; box-shadow: 0 4px 15px rgba(13,27,62,0.06); border: none; position: relative; overflow: hidden; }
+        .navbar .btn-outline-light { color: #0d1b3e; border-color: rgba(13,27,62,.35); border-radius: 10px; transition: all .2s ease; }
+        .navbar .btn-outline-light:hover { background: linear-gradient(90deg, #0a7dff, #00c9b7); border-color: transparent; color: #fff; }
+        .card { border-radius: 16px; background: rgba(255,255,255,.9); border: 1px solid rgba(255,255,255,.7); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 10px 30px rgba(13,27,62,.08); position: relative; overflow: hidden; }
         .card > * { position: relative; z-index: 1; }
         .card > .wm { position: absolute; z-index: 0; right: -16px; bottom: -16px; width: 170px; opacity: .05; pointer-events: none; }
-        .card-pin { background: linear-gradient(135deg, #0a7dff 0%, #00c9b7 100%); color: white; }
+        .card-pin { background: linear-gradient(135deg, #0a7dff 0%, #00c9b7 100%); color: white; border: 1px solid rgba(255,255,255,.35); box-shadow: 0 14px 34px rgba(10,125,255,.28); }
+        .card-pin::before { content: ""; position: absolute; inset: 0; background: radial-gradient(420px 200px at 85% 0%, rgba(255,255,255,.22), transparent 60%); z-index: 0; pointer-events: none; }
         .card-pin .text-warning { color: #ffffff !important; }
         .card-pin .text-white-50 { color: rgba(255,255,255,.85) !important; }
-        .btn-warning { background: linear-gradient(90deg, #0a7dff 0%, #00c9b7 100%); border: none !important; color: #fff !important; }
-        .btn-dark { background: linear-gradient(90deg, #0a7dff 0%, #00c9b7 100%); border: none !important; }
+        .card-pin h4 { letter-spacing: .01em; }
+        .card-pin .form-control { border: none; box-shadow: 0 4px 14px rgba(13,27,62,.18); }
+        .card h5 { font-weight: 700; color: #0d1b3e; letter-spacing: .01em; }
+        .card h5 .bi.text-primary { color: #0a7dff !important; }
+        .card h5 .bi.text-success { color: #00b39f !important; }
+        .card h6 { letter-spacing: .08em; color: #7a8aa5 !important; font-size: 11px; }
+        .table thead th { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #7a8aa5; font-weight: 700; border-bottom: 1px solid #e6ecf5; padding-top: .7rem; padding-bottom: .7rem; }
+        .table tbody td { border-color: #eef2f8; }
+        .table tbody tr { transition: background .15s ease; }
+        .table tbody tr:hover { background: rgba(10,125,255,.04); }
+        .badge.bg-secondary { background: rgba(13,27,62,.08) !important; color: #0d1b3e !important; font-weight: 600; }
+        .badge.bg-success { background: rgba(25,135,84,.12) !important; color: #157347 !important; font-weight: 600; }
+        .btn-warning { background: linear-gradient(90deg, #0a7dff 0%, #00c9b7 100%); border: none !important; color: #fff !important; border-radius: 10px; box-shadow: 0 6px 16px rgba(10,125,255,.28); transition: all .2s ease; }
+        .btn-warning:hover { transform: translateY(-1px); box-shadow: 0 10px 22px rgba(10,125,255,.34); color: #fff !important; }
+        .btn-dark { background: linear-gradient(90deg, #0a7dff 0%, #00c9b7 100%); border: none !important; box-shadow: 0 6px 16px rgba(10,125,255,.25); transition: all .2s ease; }
+        .btn-dark:hover { transform: translateY(-1px); box-shadow: 0 10px 22px rgba(10,125,255,.32); }
+        .btn-outline-primary { border-color: rgba(10,125,255,.5); color: #0a7dff; border-radius: 8px; transition: all .2s ease; }
+        .btn-outline-primary:hover { background: linear-gradient(90deg, #0a7dff, #00c9b7); border-color: transparent; color: #fff; }
+        .form-control { border-radius: 10px; border-color: #d5deeb; }
+        .form-control:focus { border-color: #0a7dff; box-shadow: 0 0 0 4px rgba(10,125,255,.14); }
         .logo-simbolo { height: 36px; }
         .logo-nombre { height: 24px; }
     </style>

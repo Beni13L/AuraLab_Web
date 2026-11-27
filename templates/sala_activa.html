@@ -5,18 +5,31 @@
     <title>Control de Sala Flash - AuraLab</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f2f6fb; font-family: 'Segoe UI', Tahoma, sans-serif; color: #0d1b3e; }
-        .pin-gigante { font-size: 5rem; font-weight: 900; letter-spacing: 5px; background: linear-gradient(90deg, #0a7dff 0%, #00c9b7 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .card-sala { border-radius: 20px; box-shadow: 0 10px 30px rgba(13,27,62,0.08); border: none; position: relative; overflow: hidden; }
+        body { background: radial-gradient(900px 480px at 88% -8%, rgba(10,125,255,.09), transparent 60%), radial-gradient(720px 420px at -8% 12%, rgba(0,201,183,.08), transparent 60%), #f2f6fb; font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; color: #0d1b3e; }
+        h1, h2, h3, h4, .btn { font-family: 'Sora', 'Plus Jakarta Sans', system-ui, sans-serif; }
+        .pin-gigante { font-size: 5rem; font-weight: 800; letter-spacing: 5px; background: linear-gradient(90deg, #0a7dff 0%, #00c9b7 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .card-sala { background: rgba(255,255,255,.92) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,.75); border-radius: 20px; box-shadow: 0 18px 44px rgba(13,27,62,.12); position: relative; overflow: hidden; }
+        .card-sala > * { position: relative; z-index: 1; }
+        .card-sala > .wm-card { position: absolute; z-index: 0; }
+        .card-sala h4 { letter-spacing: .08em; color: #5a6b85 !important; font-weight: 700; }
+        .card-sala h4 .bi { color: #0a7dff !important; }
+        .card-sala h2 { font-weight: 800; letter-spacing: .01em; }
+        .card-sala .bg-light { background: linear-gradient(180deg, rgba(10,125,255,.06), rgba(0,201,183,.05)) !important; border: 1px solid rgba(10,125,255,.14) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.9); }
+        .card-sala .alert-success { background: rgba(25,135,84,.08) !important; border: 1px solid rgba(25,135,84,.28) !important; border-radius: 12px; color: #146c43; }
         .radar-pulse { animation: pulse 2s infinite; }
         @keyframes pulse {
             0% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.1); opacity: 0.7; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .btn-warning { background: linear-gradient(90deg, #0a7dff 0%, #00c9b7 100%); border: none; color: #fff !important; }
-        .btn-warning:hover { filter: brightness(1.08); color: #fff !important; }
+        .btn-warning { background: linear-gradient(90deg, #0a7dff 0%, #00c9b7 100%); border: none; color: #fff !important; box-shadow: 0 8px 20px rgba(10,125,255,.30); transition: all .2s ease; }
+        .btn-warning:hover { transform: translateY(-1px); box-shadow: 0 12px 26px rgba(10,125,255,.36); color: #fff !important; }
+        .btn-danger { background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%); border: none; box-shadow: 0 8px 20px rgba(220,53,69,.28); transition: all .2s ease; }
+        .btn-danger:hover { transform: translateY(-1px); box-shadow: 0 12px 26px rgba(220,53,69,.34); background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%); }
+        .btn-outline-dark { border-radius: 10px; transition: all .2s ease; }
+        .btn-outline-dark:hover { background: #0d1b3e; border-color: #0d1b3e; transform: translateY(-1px); }
         .brand-simbolo { height: 46px; }
         .brand-nombre { height: 30px; }
         .wm-card { position: absolute; right: -12px; bottom: -12px; width: 170px; opacity: 0.05; pointer-events: none; }
