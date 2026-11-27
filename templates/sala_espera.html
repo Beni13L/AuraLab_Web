@@ -30,23 +30,21 @@
 </div>
 
 <script>
-    // MAGIA DE SINCRONIZACIÓN: Revisa cada 3 segundos si el profe ya inició el examen
+    // SINCRONIZACIÓN: Revisa cada 3 segundos si el profe ya inició el examen
     const pinSala = "{{ pin }}";
     
-    setInterval(async () => {
-        try {
-            let response = await fetch(`/verificar_estado_sala/${pinSala}`);
-            let data = await response.json();
-            
-            if (data.estado === 'Activa') {
-                // Si el profe dio iniciar, redirigimos al alumno al examen en vivo
-                window.location.href = `/examen_flash/${pinSala}`;
-            }
-        } catch (error) {
-            console.log("Verificando conexión con el servidor...");
-        }
-    }, 3000); // Revisa cada 3 segundos
-</script>
+    const intervaloEspera = setInterval(async () => {
+    try {
+        let response = await fetch(`/verificar_estado_sala/${pinSala}`);
+        let data = await response.json();
 
-</body>
-</html>
+        if (data.estado === 'Activa') {
+            window.location.href = `/examen_flash/${pinSala}`;
+        } else if (data.estado === 'Cerrada') {
+            clearInterval(intervaloEspera);
+            document.querySelector('.alert').innerHTML = 'El examen ya cerró o el PIN no existe. Avísale a tu profesor.';
+        }
+    } catch (error) {
+        console.log("Verificando conexión con el servidor...");
+    }
+}, 5000); // Revisa cada 5 segundos
