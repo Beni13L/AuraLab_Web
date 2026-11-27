@@ -544,10 +544,10 @@ def radar_dudas(pin):
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
         # 0. Estado y publicación de esta sala
-       cursor.execute("SELECT estado, resultados_publicados FROM Sesiones_Activas WHERE codigo_sala = %s", (pin,))
-       sala = cursor.fetchone()
-       estado = sala['estado'] if sala else 'Cerrada'
-       publicado = bool(sala['resultados_publicados']) if sala else False
+        cursor.execute("SELECT estado, resultados_publicados FROM Sesiones_Activas WHERE codigo_sala = %s", (pin,))
+        sala = cursor.fetchone()
+        estado = sala['estado'] if sala else 'Cerrada'
+        publicado = bool(sala['resultados_publicados']) if sala else False
         # 1. Estadísticas globales por pregunta (agregando opciones)
         cursor.execute("""
             SELECT p.id_pregunta_flash, p.texto_pregunta, p.opcion_a, p.opcion_b, p.opcion_c, p.opcion_d, p.respuesta_correcta,
