@@ -6,14 +6,43 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f4f7f6; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        .login-container { background: #fff; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); overflow: hidden; max-width: 900px; width: 100%; display: flex; }
-        .login-form { padding: 50px; width: 50%; }
-        .flash-eval { background: linear-gradient(135deg, #4a90e2 0%, #50e3c2 100%); padding: 50px; width: 50%; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        body { margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif; min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            background: radial-gradient(640px 640px at 28% 18%, rgba(0,150,255,.68), transparent 65%),
+                        radial-gradient(600px 600px at 72% 82%, rgba(0,212,190,.62), transparent 65%),
+                        radial-gradient(480px 480px at 78% 12%, rgba(80,90,255,.45), transparent 65%),
+                        linear-gradient(150deg, #050d24 0%, #0a1a4a 55%, #062a3a 100%);
+            background-attachment: fixed; }
+        .login-container { background: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.02));
+            border: 1px solid rgba(255,255,255,.25);
+            border-radius: 24px; box-shadow: 0 24px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.28);
+            overflow: hidden; max-width: 940px; width: 100%; display: flex;
+            backdrop-filter: blur(26px) saturate(150%); -webkit-backdrop-filter: blur(26px) saturate(150%); }
+        .login-form { padding: 50px; width: 50%; position: relative; }
+        .login-form .form-label { color: rgba(255,255,255,.78) !important; }
+        .login-form .form-control { border-radius: 10px; padding: 12px 15px;
+            background-color: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.18); color: #fff; }
+        .login-form .form-control::placeholder { color: rgba(255,255,255,.45); }
+        .login-form .form-control:focus { border-color: #00d4c8; background-color: rgba(255,255,255,.09);
+            box-shadow: 0 0 0 0.25rem rgba(0,212,200,.22); color: #fff; }
+        .login-form .btn-dark { background: linear-gradient(90deg, #1a7dff 0%, #00c9b7 100%);
+            border-radius: 10px; padding: 12px; font-weight: bold; border: none; }
+        .login-form .text-center a:first-child { color: rgba(255,255,255,.92) !important; }
+        .login-form .text-center a:last-child { color: #4de3d3 !important; }
+        .logo-login { width: 100%; max-width: 300px; display: block; margin: 0 auto 6px; }
+        .login-sub { color: rgba(255,255,255,.72); font-size: .85rem; }
+        .wm-form { position: absolute; right: -14px; bottom: -14px; width: 150px; opacity: .05;
+            pointer-events: none; z-index: 0; }
+        .flash-eval { background: linear-gradient(135deg, #0a7dff 0%, #00c9b7 100%); padding: 50px; width: 50%;
+            color: white; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; position: relative; overflow: hidden; }
+        .flash-eval > * { position: relative; z-index: 1; }
+        .wm-flash { position: absolute !important; right: -18px; bottom: -18px; width: 190px; opacity: .13;
+            pointer-events: none; z-index: 0 !important; }
         .form-control { border-radius: 10px; padding: 12px 15px; background-color: #f8f9fa; border: 1px solid #e1e5eb; }
         .form-control:focus { border-color: #4a90e2; box-shadow: 0 0 0 0.25rem rgba(74, 144, 226, 0.2); }
         .btn-dark { background-color: #2c3e50; border-radius: 10px; padding: 12px; font-weight: bold; border: none; }
-        .btn-light { border-radius: 10px; padding: 12px; font-weight: bold; color: #4a90e2; border: none; }
+        .btn-light { border-radius: 10px; padding: 12px; font-weight: bold; color: #0a7dff; border: none; }
         .flash-input { background: rgba(255,255,255,0.9); border: none; text-align: center; font-weight: bold; font-size: 1.1rem; letter-spacing: 2px; }
         .flash-input:focus { background: #fff; }
         .fade-transition { transition: opacity 0.5s ease-in-out; }
@@ -24,8 +53,8 @@
         <!-- MITAD IZQUIERDA: LOGIN -->
         <div class="login-form">
             <div class="text-center mb-4">
-                <h3 class="fw-bold text-dark"><i class="bi bi-cpu text-primary"></i> AuraLab</h3>
-                <p class="text-muted small">Portal Académico Oficial</p>
+                <img src="{{ url_for('static', filename='img/logo-completo.png') }}" alt="AuraLab" class="logo-login">
+                <p class="login-sub">Portal Académico Oficial</p>
             </div>
             
             {% if error %}
@@ -46,6 +75,7 @@
                 <a href="#" data-bs-toggle="modal" data-bs-target="#modalClaveDocente" class="d-block small mb-2" style="color: #2c3e50; font-weight: bold; text-decoration: none;"><i class="bi bi-briefcase"></i> ¿Eres Docente de nuevo ingreso?</a>
                 <a href="#" data-bs-toggle="modal" data-bs-target="#modalClaveAlumno" class="d-block small" style="color: #4a90e2; font-weight: bold; text-decoration: none;"><i class="bi bi-mortarboard"></i> ¿Eres Alumno y tienes código de clase?</a>
             </div>
+            <img src="{{ url_for('static', filename='img/marca-agua-blanca.png') }}" alt="" class="wm-form">
         </div>
         <!-- MITAD DERECHA: EVALUACIÓN FLASH -->
         <div class="flash-eval">
@@ -57,6 +87,7 @@
                 <input type="text" name="pin_sala" class="form-control form-control-lg flash-input mb-3" placeholder="EJ. CUT-X9L2" required style="text-transform: uppercase;">
                 <button type="submit" class="btn btn-light w-100 btn-lg shadow-sm">Unirse a la Clase</button>
             </form>
+            <img src="{{ url_for('static', filename='img/marca-agua-blanca.png') }}" alt="" class="wm-flash">
         </div>
     </div>
 

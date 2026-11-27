@@ -6,11 +6,21 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        .navbar { background-color: #1a252f; }
-        .card { border-radius: 16px; border: none; }
+        body { background-color: #f2f6fb; font-family: 'Segoe UI', Tahoma, sans-serif; color: #0d1b3e; }
+        .navbar { background: linear-gradient(90deg, #0d1b3e 0%, #123a7d 100%); }
+        .navbar-brand img { vertical-align: middle; }
+        .brand-simbolo { height: 34px; }
+        .brand-nombre { height: 24px; }
+        .card { border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(13,27,62,0.06); background-color: #fff; }
         .alerta-temprana { background-color: #fff3cd; color: #856404; border-radius: 8px; font-size: 0.9rem; }
         .progress { height: 10px; border-radius: 5px; background-color: #e9ecef; }
+        .btn-primary { background: linear-gradient(90deg, #0a7dff 0%, #00c9b7 100%); border: none; }
+        .btn-primary:hover { filter: brightness(1.08); }
+        .btn-success { background: linear-gradient(90deg, #0a7dff 0%, #00c9b7 100%); border: none; }
+        .btn-success:hover { filter: brightness(1.08); }
+        .modal-header.bg-dark, .card-header.bg-dark { background: linear-gradient(90deg, #0d1b3e 0%, #123a7d 100%) !important; }
+        .container { position: relative; }
+        .wm-panel { position: absolute; right: 0; top: 0; width: 180px; opacity: 0.05; pointer-events: none; }
         
         @media print {
             .navbar, .btn { display: none !important; }
@@ -26,6 +36,7 @@
     <!-- NAVBAR SUPERIOR -->
     <nav class="navbar navbar-dark px-4 py-3 shadow-sm">
         <a href="/panel_maestro" class="navbar-brand fs-6"><i class="bi bi-arrow-left-circle me-2"></i> Volver a Mis Grupos</a>
+        <span class="d-flex align-items-center gap-2"><img src="{{ url_for('static', filename='img/logo-simbolo.png') }}" alt="AuraLab" class="brand-simbolo"><img src="{{ url_for('static', filename='img/logo-nombre-claro.png') }}" alt="AuraLab" class="brand-nombre"></span>
         <div>
             <a href="/panel_maestro" class="btn btn-outline-light btn-sm me-2"><i class="bi bi-person-workspace"></i> Panel Docente</a>
             <a href="/logout" class="btn btn-light btn-sm fw-bold">Cerrar Sesión</a>
@@ -33,6 +44,7 @@
     </nav>
 
     <div class="container py-5">
+        <img src="{{ url_for('static', filename='img/marca-agua-azul-marino.png') }}" alt="" class="wm-panel">
         <!-- HEADER PRINCIPAL -->
         <div class="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
             <div>
