@@ -524,6 +524,20 @@ def cerrar_examen(pin):
     conexion.close()
     return redirect(url_for('radar_dudas', pin=pin))
 
+@app.route('/publicar_resultados/<pin>', methods=['POST'])
+def publicar_resultados(pin):
+    if session.get('rol') != 'Maestro':
+        return redirect(url_for('login'))
+    conexion = obtener_conexion()
+    with conexion.cursor() as cursor:
+        cursor.execute(
+            "UPDATE Sesiones_Activas SET resultados_publicados = 1 "
+            "WHERE codigo_sala = %s AND id_maestro = %s",
+            (pin, session['id_usuario']))
+        conexion.commit()
+    conexion.close()
+    return redirect(url_for('radar_dudas', pin=pin))
+
 @app.route('/radar_dudas/<pin>')
 def radar_dudas(pin):
     if 'id_usuario' not in session: return redirect(url_for('login'))
