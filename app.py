@@ -543,6 +543,11 @@ def radar_dudas(pin):
     if 'id_usuario' not in session: return redirect(url_for('login'))
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
+        # 0. Estado y publicación de esta sala
+       cursor.execute("SELECT estado, resultados_publicados FROM Sesiones_Activas WHERE codigo_sala = %s", (pin,))
+       sala = cursor.fetchone()
+       estado = sala['estado'] if sala else 'Cerrada'
+       publicado = bool(sala['resultados_publicados']) if sala else False
         # 1. Estadísticas globales por pregunta (agregando opciones)
         cursor.execute("""
             SELECT p.id_pregunta_flash, p.texto_pregunta, p.opcion_a, p.opcion_b, p.opcion_c, p.opcion_d, p.respuesta_correcta,
@@ -604,11 +609,13 @@ def radar_dudas(pin):
         cursor.execute("SELECT COUNT(*) as total FROM Preguntas_Flash WHERE codigo_sala = %s", (pin,))
         resultado_total = cursor.fetchone()
         total_preguntas = resultado_total['total'] if resultado_total else 0
+       
 
     conexion.close()
     return render_template('radar_dudas.html', pin=pin, estadisticas=estadisticas, 
                            calificaciones=calificaciones, total_preguntas=total_preguntas, 
                            detalles=detalles_por_alumno, alumnos_por_pregunta=alumnos_por_pregunta)
+                           detalles=detalles_por_alumno, alumnos_por_pregunta=alumnos_por_pregunta, publicado=publicado, estado=estado)
 
 # ================= EXAMEN FLASH (LÓGICA DEL ALUMNO) =================
 @app.route('/sala_espera/<pin>')
