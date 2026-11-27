@@ -673,25 +673,42 @@ def guardar_respuestas_flash():
 
 @app.route('/diagnostico_alumno/<pin>')
 def diagnostico_alumno(pin):
-    if 'id_usuario' not in session or session.get('rol') != 'Alumno': 
+    if 'id_usuario' not in session or session.get('rol') != 'Alumno':
         return redirect(url_for('login'))
-        
+
     id_usuario = session['id_usuario']
     conexion = obtener_conexion()
     with conexion.cursor() as cursor:
-        cursor.execute("""
-            SELECT p.texto_pregunta, p.respuesta_correcta, r.respuesta_elegida, r.es_correcta,
-                   p.opcion_a, p.opcion_b, p.opcion_c, p.opcion_d
-            FROM Respuestas_Flash r
-            JOIN Preguntas_Flash p ON r.id_pregunta_flash = p.id_pregunta_flash
-            WHERE r.codigo_sala = %s AND r.id_alumno = %s
-        """, (pin, id_usuario))
-        respuestas = cursor.fetchall()
-        
-        aciertos = sum(1 for r in respuestas if r['es_correcta'])
-        total = len(respuestas)
-    conexion.close()
-    return render_template('diagnostico_alumno.html', pin=pin, respuestas=respuestas, aciertos=aciertos, total=total)
+        # ¿El maestro ya publicó la corrección de esta sala?
+        cursor.execute("SELECT resultados_publicados FROM Sesiones_Activas WHERE codigo_sala = %s", (pin,))
+        sala = cursor.fetchone()
+        publicado = bool(sala['resultados_publicados']) if sala else False
 
+        # Calificación: visible siempre (no revela qué preguntas fallaron)
+        cursor.execute("""
+            SELECT COUNT(*) AS total,
+                   COALESCE(SUM(CASE WHEN es_correcta = 1 THEN 1 ELSE 0 END), 0) AS aciertos
+            FROM Respuestas_Flash
+            WHERE codigo_sala = %s AND id_alumno = %s
+        """, (pin, id_usuario))
+        conteo = cursor.fetchone()
+        aciertos = conteo['aciertos']
+        total = conteo['total']
+
+        # Desglose con respuestas correctas: SOLO si está publicado
+        respuestas = []
+        if publicado:
+            cursor.execute("""
+                SELECT p.texto_pregunta, p.respuesta_correcta, r.respuesta_elegida, r.es_correcta,
+                       p.opcion_a, p.opcion_b, p.opcion_c, p.opcion_d
+                FROM Respuestas_Flash r
+                JOIN Preguntas_Flash p ON r.id_pregunta_flash = p.id_pregunta_flash
+                WHERE r.codigo_sala = %s AND r.id_alumno = %s
+            """, (pin, id_usuario))
+            respuestas = cursor.fetchall()
+    conexion.close()
+    return render_template('diagnostico_alumno.html', pin=pin, respuestas=respuestas,
+                           aciertos=aciertos, total=total, publicado=publicado)
+    
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=5000)
